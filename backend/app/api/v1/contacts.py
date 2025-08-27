@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette import status
-from ...data.database import SessionLocal
+from app.data.database import SessionLocal
 
 router = APIRouter(
   prefix="/api/v1/contacts",
