@@ -117,7 +117,7 @@ class Interview(Base):
     application_id = Column(
         Integer, ForeignKey("applications.id"), nullable=False, index=True
     )
-    scheduled_date = Column(Date, nullable=False)
+    scheduled_date = Column(DateTime, nullable=False)
     type = Column(SqlEnum(InterviewType), nullable=False)
     notes = Column(Text)
 
