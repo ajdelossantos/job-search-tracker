@@ -1,19 +1,23 @@
 """SQLAlchemy ORM models for the Job Search Tracker backend.
 
 This module defines the relational schema for the app, including:
-- Enumerations for standardizing domain values (interview types, job location, pipeline, resolution).
+- Enumerations for standardizing domain values (interview types, job location, pipeline,
+  resolution).
 - Core entities:
     - Application: A job application the user has created/tracked.
     - Contact: A person associated with an application (recruiter, hiring manager, etc.).
     - Interview: A scheduled interview tied to an application.
-    - PipelineHistory: A historical record of changes to an application’s pipeline status (audit/history log).
+    - PipelineHistory: A historical record of changes to an application’s pipeline
+      status (audit/history log).
 - Many-to-many relationship between Applications and Contacts via `application_contacts`.
 - Basic integrity constraints on salary fields.
 
 Relationships:
 - `Application.interviews` (1-to-many): An application has zero or more interviews.
-- `Application.contacts` (many-to-many): An application is linked to one or more contacts, and vice versa.
-- `PipelineHistory` references `Application` to record timestamped transitions (from_status → to_status).
+- `Application.contacts` (many-to-many): An application is linked to one or more contacts,
+  and vice versa.
+- `PipelineHistory` references `Application` to record timestamped transitions
+  (from_status → to_status).
 
 This schema supports:
 - Tracking the full lifecycle of a job application (status changes over time).
@@ -26,7 +30,6 @@ Note:
 - SQLite-compatible, but should generalize to Postgres later with minimal changes.
 """
 
-from enum import Enum
 from sqlalchemy import (
     Column,
     Integer,
@@ -41,51 +44,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from .data.database import Base
-
-
-class InterviewType(str, Enum):
-    """Type/category of an interview event in the pipeline."""
-
-    BEHAVIORAL = "behavioral"
-    FINAL = "final"
-    HIRING_MANAGER = "hiring_manager"
-    OFFER = "offer"
-    OFFER_NEGOTIATION = "offer_negotiation"
-    RECRUITER = "recruiter"
-    TECHNICAL = "technical"
-
-
-class JobLocation(str, Enum):
-    """Location modality for the job (as stated in the JD or negotiated)."""
-
-    HYBRID = "hybrid"
-    ONSITE = "onsite"
-    REMOTE = "remote"
-
-
-class PipelineStatus(str, Enum):
-    """Pipeline status for an application (high-level stage)."""
-
-    APPLIED = "applied"
-    FINAL_ROUND = "final_round"
-    OFFERED = "offered"
-    RESOLVED = "resolved"
-    STAGE_1 = "stage_1"
-    STAGE_2 = "stage_2"
-    STAGE_3_PLUS = "stage_3_plus"
-    WILL_APPLY = "will_apply"
-
-
-class ResolutionStatus(str, Enum):
-    """Outcome state for a resolved application."""
-
-    GHOSTED = "ghosted"
-    OFFER_ACCEPTED = "offer_accepted"
-    OFFER_DECLINED = "offer_declined"
-    ONGOING = "ongoing"  # still in flight
-    ON_HOLD = "on_hold"
-    REJECTED = "rejected"
+from app.data.database import Base
+from app.core.enums import InterviewType, JobLocation, PipelineStatus, ResolutionStatus
 
 
 # Association table for many-to-many between Application and Contact.
