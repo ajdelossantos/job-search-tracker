@@ -3,21 +3,20 @@
 from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, HttpUrl, Field
-from pydantic_extra_types.currency_code import Currency
 from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus
 
 
 class ApplicationBase(BaseModel):
     """Base for Application Model."""
     date_applied: date
-    company: str
+    company: str = Field(min_length=3)
     recruiting_agency: Optional[str]
-    role: str
+    role: str = Field(min_length=3)
     url: Optional[HttpUrl]
 
-    salary_min: Optional[Currency] = Field(None, ge=0)
-    salary_max: Optional[Currency] = Field(None, ge=0)
-    salary_target: Optional[Currency] = Field(None, ge=0)
+    salary_min: Optional[int] = Field(None, ge=0)
+    salary_max: Optional[int] = Field(None, ge=0)
+    salary_target: Optional[int] = Field(None, ge=0)
 
     job_location: JobLocation
     pipeline_status: PipelineStatus = PipelineStatus.WILL_APPLY

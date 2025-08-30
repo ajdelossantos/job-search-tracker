@@ -2,20 +2,20 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, EmailStr, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, HttpUrl
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class ContactBase(BaseModel):
     """Base for Contact model."""
-    name: str
-    company: str
-    email: Optional[EmailStr] = None
-    title: Optional[str] = None
-    url: Optional[HttpUrl] = None
-    role: Optional[str] = None
-    phone: Optional[PhoneNumber] = None
-    notes: Optional[str] = None
+    name: str = Field(min_length=3)
+    company: str = Field(min_length=3)
+    email: Optional[EmailStr]
+    title: Optional[str] = Field(min_length=3)
+    url: Optional[HttpUrl]
+    role: Optional[str] = Field(min_length=3)
+    phone: Optional[PhoneNumber]
+    notes: Optional[str]
 
 class ContactCreate(ContactBase):
     """Schema for creating a new contact."""

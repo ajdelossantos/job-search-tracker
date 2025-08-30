@@ -10,7 +10,7 @@ class InterviewBase(BaseModel):
     """Base model for interview schema."""
     scheduled_date: datetime
     type: InterviewType
-    notes: Optional[str] = None
+    notes: Optional[str]
 
 
 class InterviewCreate(InterviewBase):
