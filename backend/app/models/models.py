@@ -59,7 +59,7 @@ application_contacts = Table(
 )
 
 
-class Application(Base):
+class Applications(Base):
     """Represents a single job application entry being tracked."""
 
     __tablename__ = "applications"
@@ -87,11 +87,11 @@ class Application(Base):
 
     # Relationships
     interviews = relationship(
-        "Interview", back_populates="application", cascade="all, delete-orphan"
+        "Interviews", back_populates="application", cascade="all, delete-orphan"
     )
 
     contacts = relationship(
-        "Contact", secondary=application_contacts, back_populates="applications"
+        "Contacts", secondary=application_contacts, back_populates="applications"
     )
 
     __table_args__ = (
@@ -105,7 +105,7 @@ class Application(Base):
     )
 
 
-class Contact(Base):
+class Contacts(Base):
     """A person associated with an application (e.g., recruiter, hiring manager)."""
 
     __tablename__ = "contacts"
@@ -124,11 +124,11 @@ class Contact(Base):
     notes = Column(Text)
 
     applications = relationship(
-        "Application", secondary=application_contacts, back_populates="contacts"
+        "Applications", secondary=application_contacts, back_populates="contacts"
     )
 
 
-class Interview(Base):
+class Interviews(Base):
     """A scheduled interview for an application (with notes)."""
 
     __tablename__ = "interviews"
@@ -144,10 +144,10 @@ class Interview(Base):
     type = Column(SqlEnum(InterviewType), nullable=False)
     notes = Column(Text)
 
-    application = relationship("Application", back_populates="interviews")
+    application = relationship("Applications", back_populates="interviews")
 
 
-class PipelineHistory(Base):
+class PipelineHistories(Base):
     """Immutable audit log of pipeline transitions for an application.
 
     Each record captures:
@@ -157,7 +157,7 @@ class PipelineHistory(Base):
       - Optional human note
     """
 
-    __tablename__ = "pipeline_history"
+    __tablename__ = "pipeline_histories"
 
     id = Column(Integer, primary_key=True)
     application_id = Column(
