@@ -154,7 +154,7 @@ class Interviews(Base):
     application = relationship("Applications", back_populates="interviews")
 
 
-class PipelineHistories(Base):
+class PipelineHistory(Base):
     """Immutable audit log of pipeline transitions for an application.
 
     Each record captures:

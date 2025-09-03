@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Path, HTTPException, Query, Response
 from sqlalchemy.orm import Session, selectinload
 from starlette import status
 from app.data.database import SessionLocal
-from app.models.models import Application
+from app.models.models import Applications
 from app.schemas.applications import ApplicationCreate, ApplicationUpdate, ApplicationRead
 
 router = APIRouter(
@@ -32,13 +32,13 @@ async def read_applications(
     offset: int = Query(0, ge=0)
   ):
     """Read all applications."""
-    query = db.query(Application)\
+    query = db.query(Applications)\
             .options(
-                selectinload(Application.interviews),
-                selectinload(Application.contacts),
-                selectinload(Application.pipeline_histories)
+                selectinload(Applications.interviews),
+                selectinload(Applications.contacts),
+                selectinload(Applications.pipeline_histories)
             )
-    items = query.order_by(Application.created_at.desc()).limit(limit).offset(offset).all()
+    items = query.order_by(Applications.created_at.desc()).limit(limit).offset(offset).all()
 
     return items
 
@@ -46,13 +46,13 @@ async def read_applications(
 @router.get("/{application_id}", response_model=ApplicationRead, status_code=status.HTTP_200_OK)
 async def read_application(db: db_dependency, application_id: int = Path(gt=0)):
     """Read a single application by ID."""
-    application_model = db.query(Application)\
+    application_model = db.query(Applications)\
                         .options(
-                            selectinload(Application.interviews),
-                            selectinload(Application.contacts),
-                            selectinload(Application.pipeline_histories)
+                            selectinload(Applications.interviews),
+                            selectinload(Applications.contacts),
+                            selectinload(Applications.pipeline_histories)
                         )\
-                        .filter(Application.id == application_id).first()
+                        .filter(Applications.id == application_id).first()
 
     if application_model is None:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -63,7 +63,7 @@ async def read_application(db: db_dependency, application_id: int = Path(gt=0)):
 @router.post("/", response_model=ApplicationRead, status_code=status.HTTP_201_CREATED)
 async def create_application(db: db_dependency, payload: ApplicationCreate, response: Response):
     """Create a new application."""
-    new_application = Application(**payload.model_dump())
+    new_application = Applications(**payload.model_dump())
     if new_application.url is not None:
         new_application.url = str(new_application.url)
     db.add(new_application)
@@ -73,12 +73,12 @@ async def create_application(db: db_dependency, payload: ApplicationCreate, resp
     response.headers["Location"] = f"/api/v1/applications/{new_application.id}"
 
     app_full = db.get(
-        Application,
+        Applications,
         new_application.id,
         options=(
-            selectinload(Application.interviews),
-            selectinload(Application.contacts),
-            selectinload(Application.pipeline_histories),
+            selectinload(Applications.interviews),
+            selectinload(Applications.contacts),
+            selectinload(Applications.pipeline_histories),
         ),
     )
 
@@ -94,7 +94,7 @@ async def update_application(
     application_id: int = Path(gt=0)
   ):
     """Update an existing application."""
-    application_model = db.query(Application).filter(Application.id == application_id).first()
+    application_model = db.query(Applications).filter(Applications.id == application_id).first()
 
     if application_model is None:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -113,10 +113,10 @@ async def update_application(
 @router.delete("/{application_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_application(db: db_dependency, application_id: int = Path(gt=0)):
     """Delete an application by ID."""
-    application_model = db.query(Application).filter(Application.id == application_id).first()
+    application_model = db.query(Applications).filter(Applications.id == application_id).first()
 
     if application_model is None:
         raise HTTPException(status_code=404, detail="Application not found")
 
-    db.query(Application).filter(Application.id == application_id).delete()
+    db.query(Applications).filter(Applications.id == application_id).delete()
     db.commit()
