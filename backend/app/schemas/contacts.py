@@ -1,7 +1,7 @@
 """Pydantic models for contacts."""
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel, ConfigDict, Field, EmailStr, HttpUrl, computed_field
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
@@ -19,13 +19,29 @@ class ContactBase(BaseModel):
 
 class ContactCreate(ContactBase):
     """Schema for creating a new contact."""
-    pass
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "name": "Jordan Quux",
+            "company": "Acme",
+            "email": "jordan@acme.com",
+            "title": "Recruiter",
+            "url": "https://linkedin.com/in/jordan",
+            "role": "Recruiter",
+            "phone": "+15125551234",
+            "notes": "Follow up in a week",
+        }
+    })
+
+    application_ids: List[int] = Field(default_factory=list)
 
 class ContactUpdate(ContactBase):
     """Schema for updating an existing contact."""
 
     name: Optional[str] = Field(None, min_length=3)
     company: Optional[str] = Field(None, min_length=3)
+    application_ids_add: Optional[List[int]] = None
+    application_ids_remove: Optional[List[int]] = None
+
 
 class ContactRead(ContactBase):
     """Represents a contact entity with its associated attributes."""
@@ -47,9 +63,11 @@ class ContactRead(ContactBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    # IDs-only list of related applications (computed from ORM relation `applications`)
+    # Bring the ORM relation in, but exclude it from output
+    applications: List[Any] = Field(default_factory=list, exclude=True)
+
     @computed_field(return_type=List[int])
     @property
     def application_ids(self) -> List[int]:
-        apps = getattr(self, "applications", None)
-        return [a.id for a in apps] if apps else []
+        """Serializes applications ids."""
+        return [a.id for a in (self.applications or [])]
