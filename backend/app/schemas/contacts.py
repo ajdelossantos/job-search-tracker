@@ -25,7 +25,7 @@ class ContactUpdate(ContactBase):
     """Schema for updating an existing contact."""
     pass
 
-class Contact(ContactBase):
+class ContactRead(ContactBase):
     """Represents a contact entity with its associated attributes."""
     model_config = ConfigDict(from_attributes=True)
 

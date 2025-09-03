@@ -23,7 +23,7 @@ class InterviewUpdate(BaseModel):
     pass
 
 
-class Interview(InterviewBase):
+class InterviewRead(InterviewBase):
     """Represents a Interview entity with its associated attributes."""
     model_config = ConfigDict(from_attributes=True)
 

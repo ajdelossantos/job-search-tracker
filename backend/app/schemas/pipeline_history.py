@@ -18,7 +18,7 @@ class PipelineHistoryCreate(PipelineHistoryBase):
     application_id: int
 
 
-class PipelineHistory(PipelineHistoryBase):
+class PipelineHistoryRead(PipelineHistoryBase):
     """Schema for pipeline history with all fields."""
     model_config = ConfigDict(from_attributes=True)
 
