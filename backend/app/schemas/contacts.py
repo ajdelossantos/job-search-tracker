@@ -10,12 +10,12 @@ class ContactBase(BaseModel):
     """Base for Contact model."""
     name: str = Field(min_length=3)
     company: str = Field(min_length=3)
-    email: Optional[EmailStr]
-    title: Optional[str] = Field(min_length=3)
-    url: Optional[HttpUrl]
-    role: Optional[str] = Field(min_length=3)
-    phone: Optional[PhoneNumber]
-    notes: Optional[str]
+    email: Optional[EmailStr] = None
+    title: Optional[str] = Field(None, min_length=3)
+    url: Optional[HttpUrl] = None
+    role: Optional[str] = Field(None, min_length=3)
+    phone: Optional[PhoneNumber] = None
+    notes: Optional[str] = None
 
 class ContactCreate(ContactBase):
     """Schema for creating a new contact."""
@@ -32,4 +32,4 @@ class ContactRead(ContactBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    applications: list[int]
+    applications: list[int] = Field(default_factory=list)
