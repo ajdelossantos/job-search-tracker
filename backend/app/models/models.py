@@ -53,9 +53,17 @@ application_contacts = Table(
     "application_contacts",
     Base.metadata,
     Column(
-        "application_id", Integer, ForeignKey("applications.id", ondelete="CASCADE")
+        "application_id",
+        Integer,
+        ForeignKey("applications.id", ondelete="CASCADE"),
+        primary_key=True,
     ),
-    Column("contact_id", Integer, ForeignKey("contacts.id", ondelete="CASCADE")),
+    Column(
+        "contact_id",
+        Integer,
+        ForeignKey("contacts.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
 
 
