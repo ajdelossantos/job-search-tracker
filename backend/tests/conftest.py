@@ -2,6 +2,7 @@
 import os
 import tempfile
 import pytest
+from datetime import date
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
@@ -10,6 +11,8 @@ from app.data.database import Base
 from app.main import app
 from app.api.v1.applications import get_db as get_applications_db
 from app.api.v1.contacts import get_db as get_contacts_db
+from app.models.models import Applications, Contacts
+from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus
 
 
 @pytest.fixture(scope="session")
@@ -70,6 +73,61 @@ def client(db_session):
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def make_application(db_session):
+    """Create an Applications row directly via ORM."""
+
+    def _make(**overrides):
+        obj = Applications(
+            date_applied=overrides.pop("date_applied", date.today()),
+            company=overrides.pop("company", "SeedCo"),
+            role=overrides.pop("role", "SWE"),
+            url=overrides.pop("url", "https://example.com/seed"),
+            salary_min=overrides.pop("salary_min", None),
+            salary_max=overrides.pop("salary_max", None),
+            salary_target=overrides.pop("salary_target", None),
+            job_location=overrides.pop("job_location", JobLocation.REMOTE),
+            pipeline_status=overrides.pop("pipeline_status", PipelineStatus.APPLIED),
+            next_follow_up_date=overrides.pop("next_follow_up_date", None),
+            resolution_status=overrides.pop(
+                "resolution_status", ResolutionStatus.ONGOING
+            ),
+            resolution_date=overrides.pop("resolution_date", None),
+            notes=overrides.pop("notes", None),
+            **overrides,
+        )
+        db_session.add(obj)
+        db_session.commit()
+        db_session.refresh(obj)
+        return obj
+
+    return _make
+
+
+@pytest.fixture
+def make_contact(db_session):
+    """Create a Contacts row directly via ORM."""
+
+    def _make(**overrides):
+        obj = Contacts(
+            name=overrides.pop("name", "Jordan Recruiter"),
+            company=overrides.pop("company", "Acme"),
+            email=overrides.pop("email", "jordan@acme.com"),
+            title=overrides.pop("title", "Recruiter"),
+            url=overrides.pop("url", "https://acme.com/jordan"),
+            role=overrides.pop("role", "recruiter"),
+            phone=overrides.pop("phone", "+15125551212"),
+            notes=overrides.pop("notes", "seed"),
+            **overrides,
+        )
+        db_session.add(obj)
+        db_session.commit()
+        db_session.refresh(obj)
+        return obj
+
+    return _make
 
 
 # ---- Optional: compatibility aliases if you referenced get_test_* elsewhere ----
