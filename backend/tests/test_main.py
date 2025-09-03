@@ -6,7 +6,6 @@ from app.main import app
 
 client = TestClient(app)
 
-# TODO: Broken
 def test_return_health_check():
     """Tests health check."""
     response = client.get("/health-check")
