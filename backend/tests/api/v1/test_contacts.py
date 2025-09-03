@@ -1,4 +1,4 @@
-# tests/api/v1/test_contacts.py
+"""Tests for contact API endpoints."""
 from datetime import date
 from fastapi import status
 from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus
@@ -30,6 +30,7 @@ def _new_application(company="Acme"):
 
 
 def test_create_contact_returns_read(client):
+    """Test creating a contact returns the correct data."""
     r = client.post("/api/v1/contacts/", json=_new_contact())
     assert r.status_code == status.HTTP_201_CREATED, r.text
     body = r.json()
@@ -39,6 +40,7 @@ def test_create_contact_returns_read(client):
 
 
 def test_get_contact_by_id(client):
+    """Test retrieving a contact by ID."""
     created = client.post("/api/v1/contacts/", json=_new_contact("Taylor")).json()
     r = client.get(f"/api/v1/contacts/{created['id']}")
     assert r.status_code == status.HTTP_200_OK
@@ -46,6 +48,7 @@ def test_get_contact_by_id(client):
 
 
 def test_list_contacts_pagination(client):
+    """Test listing contacts with pagination."""
     client.post("/api/v1/contacts/", json=_new_contact("A"))
     client.post("/api/v1/contacts/", json=_new_contact("B"))
     r = client.get("/api/v1/contacts/?limit=1&offset=0")
@@ -53,6 +56,7 @@ def test_list_contacts_pagination(client):
 
 
 def test_patch_contact_updates_fields(client):
+    """Test updating specific fields of a contact."""
     created = client.post("/api/v1/contacts/", json=_new_contact("Delta")).json()
     r = client.patch(f"/api/v1/contacts/{created['id']}", json={"notes": "Updated"})
     assert r.status_code == 200
@@ -60,6 +64,7 @@ def test_patch_contact_updates_fields(client):
 
 
 def test_delete_contact_then_404_on_get(client):
+    """Test deleting a contact then getting it returns 404."""
     created = client.post("/api/v1/contacts/", json=_new_contact("Delete Me")).json()
     cid = created["id"]
     r_del = client.delete(f"/api/v1/contacts/{cid}")
@@ -69,6 +74,7 @@ def test_delete_contact_then_404_on_get(client):
 
 
 def test_contact_application_ids_reflect_relationship(client, db_session):
+    """Test that the application_ids field reflects the relationship with applications."""
     # create contact + application via API
     contact = client.post("/api/v1/contacts/", json=_new_contact("Rel Test")).json()
     app = client.post("/api/v1/applications/", json=_new_application("Rel Co")).json()

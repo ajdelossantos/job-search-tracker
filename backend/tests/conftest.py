@@ -8,7 +8,8 @@ from fastapi.testclient import TestClient
 
 from app.data.database import Base
 from app.main import app
-from app.api.v1.applications import get_db
+from app.api.v1.applications import get_db as get_applications_db
+from app.api.v1.contacts import get_db as get_contacts_db
 
 
 @pytest.fixture(scope="session")
@@ -64,7 +65,8 @@ def client(db_session):
         finally:
             pass
 
-    app.dependency_overrides[get_db] = _override_get_db
+    app.dependency_overrides[get_applications_db] = _override_get_db
+    app.dependency_overrides[get_contacts_db] = _override_get_db
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
