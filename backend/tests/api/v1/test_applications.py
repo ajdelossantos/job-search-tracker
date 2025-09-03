@@ -37,20 +37,21 @@ def test_create_application_returns_full_read(client):
     assert body.get("pipeline_histories", []) == []
 
 
-def test_get_application_by_id(client):
+def test_get_application_by_id(client, make_application):
     """Tests retrieving an application by ID."""
-    created = client.post("/api/v1/applications/", json=_new_payload("Beta LLC")).json()
-    r = client.get(f"/api/v1/applications/{created['id']}")
+    created = make_application(company="Beta LLC")
+    r = client.get(f"/api/v1/applications/{created.id}")
+
     assert r.status_code == status.HTTP_200_OK
-    assert r.json()["id"] == created["id"]
+    assert r.json()["id"] == created.id
     assert r.json()["company"] == "Beta LLC"
 
 
-def test_list_applications_with_pagination(client):
+def test_list_applications_with_pagination(client, make_application):
     """Tests listing applications with pagination."""
     # seed two
-    client.post("/api/v1/applications/", json=_new_payload("Alpha Inc"))
-    client.post("/api/v1/applications/", json=_new_payload("Gamma Ltd"))
+    make_application(company="Alpha Inc")
+    make_application(company="Gamma Ltd")
 
     r = client.get("/api/v1/applications/?limit=1&offset=0")
     assert r.status_code == status.HTTP_200_OK
