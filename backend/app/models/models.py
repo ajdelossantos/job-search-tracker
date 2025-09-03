@@ -94,6 +94,13 @@ class Applications(Base):
         "Contacts", secondary=application_contacts, back_populates="applications"
     )
 
+    pipeline_histories = relationship(
+        "PipelineHistory",
+        backref="application",
+        cascade="all, delete-orphan",
+        order_by="PipelineHistory.changed_at.desc()",
+    )
+
     __table_args__ = (
         # Salary constraints to avoid nonsensical input
         CheckConstraint(
