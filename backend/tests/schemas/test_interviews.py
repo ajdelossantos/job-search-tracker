@@ -8,6 +8,7 @@ from app.core.enums import InterviewType
 
 
 def test_interview_create_valid_utc():
+    """Test valid interview creation with UTC datetime."""
     m = InterviewCreate(
         scheduled_date=datetime.now(timezone.utc) + timedelta(days=1),
         type=InterviewType.RECRUITER,
@@ -18,6 +19,7 @@ def test_interview_create_valid_utc():
 
 
 def test_interview_create_rejects_naive_datetime():
+    """Test that InterviewCreate rejects naive datetime."""
     with pytest.raises(ValidationError) as e:
         InterviewCreate(
             scheduled_date=datetime.utcnow(),  # naive
@@ -27,6 +29,7 @@ def test_interview_create_rejects_naive_datetime():
 
 
 def test_interview_update_partial_and_tz_enforced():
+    """Test that InterviewUpdate enforces timezone awareness."""
     # partial update only notes
     u = InterviewUpdate(notes="Updated notes only")
     d = u.model_dump(exclude_unset=True)
@@ -38,6 +41,7 @@ def test_interview_update_partial_and_tz_enforced():
 
 
 def test_interview_read_from_payload_and_dump():
+    """Test that InterviewRead can be created from a payload and dumped back to a dict."""
     payload = {
         "id": 10,
         "application_id": 1,
@@ -61,6 +65,7 @@ def test_interview_read_from_payload_and_dump():
 
 
 def test_interview_type_must_be_valid():
+    """Test that InterviewCreate rejects invalid interview types."""
     with pytest.raises(ValidationError):
         InterviewCreate(
             scheduled_date=datetime.now(timezone.utc),
