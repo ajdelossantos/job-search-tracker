@@ -1,8 +1,9 @@
-# tests/conftest.py
+"""Configuration for testing environment."""
+
 import os
 import tempfile
+from datetime import date, time
 import pytest
-from datetime import date
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
@@ -11,7 +12,7 @@ from app.data.database import Base
 from app.main import app
 from app.api.v1.applications import get_db as get_applications_db
 from app.api.v1.contacts import get_db as get_contacts_db
-from app.models.models import Applications, Contacts
+from app.models.models import Applications, Contacts, Interviews
 from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus
 
 
@@ -119,6 +120,26 @@ def make_contact(db_session):
             url=overrides.pop("url", "https://acme.com/jordan"),
             role=overrides.pop("role", "recruiter"),
             phone=overrides.pop("phone", "+15125551212"),
+            notes=overrides.pop("notes", "seed"),
+            **overrides,
+        )
+        db_session.add(obj)
+        db_session.commit()
+        db_session.refresh(obj)
+        return obj
+
+    return _make
+
+
+@pytest.fixture
+def make_interview(db_session):
+    """Create an Interviews row directly via ORM."""
+
+    def _make(**overrides):
+        obj = Interviews(
+            date=overrides.pop("date", date.today()),
+            time=overrides.pop("time", time(10, 0)),
+            location=overrides.pop("location", "Zoom"),
             notes=overrides.pop("notes", "seed"),
             **overrides,
         )
