@@ -48,14 +48,16 @@ class ContactRead(ContactBase):
     model_config = ConfigDict(
         from_attributes=True,
         json_schema_extra={
-            "name": "Jordan Quux",
-            "company": "Acme",
-            "email": "jordan@acme.com",
-            "title": "Recruiter",
-            "url": "https://linkedin.com/in/jordan",
-            "role": "Recruiter",
-            "phone": "+15125551234",
-            "notes": "Follow up in a week",
+            "example": {
+              "name": "Jordan Quux",
+              "company": "Acme",
+              "email": "jordan@acme.com",
+              "title": "Recruiter",
+              "url": "https://linkedin.com/in/jordan",
+              "role": "Recruiter",
+              "phone": "+15125551234",
+              "notes": "Follow up in a week",
+            }
         },
     )
 
