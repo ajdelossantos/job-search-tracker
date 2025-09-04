@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from ..core.enums import InterviewType
 
 
@@ -10,21 +10,34 @@ class InterviewBase(BaseModel):
     """Base model for interview schema."""
     scheduled_date: datetime = Field(..., description="Timezone-aware datetime")
     type: InterviewType
-    notes: Optional[str]
+    notes: Optional[str] = None
 
-    @field_validator("scheduled_date")
-    @classmethod
-    def ensure_tz_aware(cls, v: datetime) -> datetime:
-        # Be strict: DB column is timezone-aware; reject naive datetimes.
-        if v.tzinfo is None or v.tzinfo.utcoffset(v) is None:
+    @model_validator(mode="after")
+    def _tz_required(self):
+        """Ensure scheduled_date is timezone-aware."""
+        if self.scheduled_date.tzinfo is None: # pylint: disable=E1101
             raise ValueError("scheduled_date must be timezone-aware (e.g., '...Z').")
-        return v
+        return self
 
 
-class InterviewCreate(InterviewBase):
+class InterviewCreateFlat(InterviewBase):
     """Schema for creating a new Interview."""
     model_config = ConfigDict(json_schema_extra={
         "example": {
+            "scheduled_date": "2025-09-05T19:00:00Z",
+            "type": InterviewType.RECRUITER.value,
+            "notes": "Recruiter call",
+        }
+    })
+
+    application_id: Optional[int] = None  # only used by flat POST
+
+
+class InterviewCreate(InterviewBase):
+    """For nested POST; application_id comes from the path.Schema for creating a new Interview."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "application_id": 69,
             "scheduled_date": "2025-09-05T19:00:00Z",
             "type": InterviewType.RECRUITER.value,
             "notes": "Recruiter call",
@@ -37,15 +50,16 @@ class InterviewUpdate(BaseModel):
     scheduled_date: Optional[datetime] = None
     type: Optional[InterviewType] = None
     notes: Optional[str] = None
+    application_id: Optional[int] = None  # allow reassign (optional)
 
-    @field_validator("scheduled_date")
-    @classmethod
-    def ensure_tz_aware(cls, v: Optional[datetime]) -> Optional[datetime]:
-        if v is None:
-            return v
-        if v.tzinfo is None or v.tzinfo.utcoffset(v) is None:
+    @model_validator(mode="after")
+    def _tz_required_if_present(self):
+        """Ensure scheduled_date is timezone-aware if present."""
+        if (
+            self.scheduled_date is not None and self.scheduled_date.tzinfo is None
+        ):  # pylint: disable=E1101
             raise ValueError("scheduled_date must be timezone-aware (e.g., '...Z').")
-        return v
+        return self
 
 
 class InterviewRead(InterviewBase):
