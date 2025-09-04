@@ -2,16 +2,18 @@
 
 import os
 import tempfile
-from datetime import date, time
+from datetime import date, datetime, timezone
 import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
+from app.core.enums import InterviewType
 from app.data.database import Base
 from app.main import app
 from app.api.v1.applications import get_db as get_applications_db
 from app.api.v1.contacts import get_db as get_contacts_db
+from app.api.v1.interviews import get_db as get_interviews_db
 from app.models.models import Applications, Contacts, Interviews
 from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus
 
@@ -71,6 +73,7 @@ def client(db_session):
 
     app.dependency_overrides[get_applications_db] = _override_get_db
     app.dependency_overrides[get_contacts_db] = _override_get_db
+    app.dependency_overrides[get_interviews_db] = _override_get_db
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -132,14 +135,15 @@ def make_contact(db_session):
 
 
 @pytest.fixture
-def make_interview(db_session):
-    """Create an Interviews row directly via ORM."""
+def make_interview(db_session, make_application):
+    """Create an Interviews row directly via ORM (avoids POST dependency)."""
 
     def _make(**overrides):
+        application = overrides.pop("application", None) or make_application()
         obj = Interviews(
-            date=overrides.pop("date", date.today()),
-            time=overrides.pop("time", time(10, 0)),
-            location=overrides.pop("location", "Zoom"),
+            application_id=overrides.pop("application_id", application.id),
+            scheduled_date=overrides.pop("scheduled_date", datetime.now(timezone.utc)),
+            type=overrides.pop("type", InterviewType.RECRUITER),
             notes=overrides.pop("notes", "seed"),
             **overrides,
         )
