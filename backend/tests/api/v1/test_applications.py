@@ -31,10 +31,14 @@ def test_create_application_returns_full_read(client):
     assert body["url"] == "https://example.com/jobs/123"
     assert body["pipeline_status"] == PipelineStatus.WILL_APPLY.value
     assert body["resolution_status"] == ResolutionStatus.ONGOING.value
-    # nested arrays should be present even if empty
+
+    # nested arrays should be present; pipeline_histories now has an initial row
     assert body["interviews"] == []
     assert body["contacts"] == []
-    assert body.get("pipeline_histories", []) == []
+    ph = body.get("pipeline_histories", [])
+    assert isinstance(ph, list) and len(ph) == 1
+    assert ph[0]["from_status"] is None
+    assert ph[0]["to_status"] == PipelineStatus.WILL_APPLY.value
 
 
 def test_get_application_by_id(client, make_application):
