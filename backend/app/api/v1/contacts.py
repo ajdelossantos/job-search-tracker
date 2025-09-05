@@ -1,6 +1,6 @@
 """Contacts resources."""
 
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Optional, cast
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response
 from sqlalchemy.orm import Session, selectinload
 from starlette import status
@@ -90,7 +90,10 @@ async def create_contact(db: db_dependency, payload: ContactCreate, response: Re
             raise HTTPException(
                 status_code=400, detail=f"Invalid application_ids: {sorted(missing)}"
             )
-        contact_model.applications.extend(applications)
+
+        # CAST relationship to a list for mypy
+        rel = cast(list[Applications], contact_model.applications)
+        rel.extend(applications)
 
     db.add(contact_model)
     db.commit()
@@ -101,7 +104,7 @@ async def create_contact(db: db_dependency, payload: ContactCreate, response: Re
         contact_model.id,
         options=(selectinload(Contacts.applications),),
     )
-
+    assert created is not None  # mypy: Optional[Contacts]
     response.headers["Location"] = f"/api/v1/contacts/{created.id}"
     return created
 
@@ -134,8 +137,11 @@ async def update_contact(
         data["phone"] = str(data["phone"])
     if "email" in data and data["email"] is not None:
         data["email"] = str(data["email"])
+
     for k, v in data.items():
         setattr(contact_model, k, v)
+
+    rel = cast(list[Applications], contact_model.applications)
 
     # add links
     if ids_add:
@@ -146,28 +152,27 @@ async def update_contact(
                 status_code=400,
                 detail=f"Invalid application_ids_add: {sorted(missing)}",
             )
-        existing = {a.id for a in contact_model.applications}
+        existing = {a.id for a in rel}
         for a in apps:
             if a.id not in existing:
-                contact_model.applications.append(a)
+                rel.append(a)
 
     # remove links
     if ids_remove:
         # optional: validate they exist; harmless to skip
         remove_set = set(ids_remove)
-        contact_model.applications = [
-            a for a in contact_model.applications if a.id not in remove_set
-        ]
+        # in-place mutation instead of assignment (avoids mypy’s assignment error)
+        rel[:] = [a for a in rel if a.id not in remove_set]
 
     db.add(contact_model)
     db.commit()
 
     # return with relation loaded so application_ids is computed
-    return db.get(
-        Contacts,
-        contact_id,
-        options=(selectinload(Contacts.applications),),
+    updated = db.get(
+        Contacts, contact_id, options=(selectinload(Contacts.applications),)
     )
+    assert updated is not None
+    return updated
 
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
