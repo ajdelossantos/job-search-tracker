@@ -56,7 +56,7 @@ async def list_pipeline_history_for_application(
     query = (
         db.query(PipelineHistory)
         .filter(PipelineHistory.application_id == application_id)
-        .order_by(PipelineHistory.changed_at.desc())
+        .order_by(PipelineHistory.changed_at.desc(), PipelineHistory.id.desc())
         .limit(limit)
         .offset(offset)
     )
@@ -133,7 +133,10 @@ async def read_pipeline_histories(
         query = query.filter(PipelineHistory.application_id == application_id)
 
     pipeline_histories = (
-        query.order_by(PipelineHistory.changed_at.desc())
+        query.order_by(
+            PipelineHistory.changed_at.desc(),
+            PipelineHistory.id.desc(),
+        )
         .limit(limit)
         .offset(offset)
         .all()
