@@ -14,7 +14,8 @@ from app.main import app
 from app.api.v1.applications import get_db as get_applications_db
 from app.api.v1.contacts import get_db as get_contacts_db
 from app.api.v1.interviews import get_db as get_interviews_db
-from app.models.models import Applications, Contacts, Interviews
+from app.api.v1.pipeline_history import get_db as get_pipeline_history_db
+from app.models.models import Applications, Contacts, Interviews, PipelineHistory
 from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus
 
 
@@ -74,6 +75,7 @@ def client(db_session):
     app.dependency_overrides[get_applications_db] = _override_get_db
     app.dependency_overrides[get_contacts_db] = _override_get_db
     app.dependency_overrides[get_interviews_db] = _override_get_db
+    app.dependency_overrides[get_pipeline_history_db] = _override_get_db
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -154,6 +156,33 @@ def make_interview(db_session, make_application):
 
     return _make
 
+
+@pytest.fixture
+def make_pipeline_history(db_session, make_application):
+    """Create a PipelineHistory row via ORM."""
+
+    def _make(**overrides):
+        application_id = overrides.pop("application_id", None)
+        if application_id is None:
+            application = make_application()
+            application_id = application.id
+
+        obj = PipelineHistory(
+            application_id=application_id,
+            from_status=overrides.pop("from_status", PipelineStatus.WILL_APPLY),
+            to_status=overrides.pop("to_status", PipelineStatus.APPLIED),
+            note=overrides.pop("note", "seed"),
+            changed_at=overrides.pop(
+                "changed_at", None
+            ),  # may be None to use server default
+            **overrides,
+        )
+        db_session.add(obj)
+        db_session.commit()
+        db_session.refresh(obj)
+        return obj
+
+    return _make
 
 # ---- Optional: compatibility aliases if you referenced get_test_* elsewhere ----
 # @pytest.fixture
