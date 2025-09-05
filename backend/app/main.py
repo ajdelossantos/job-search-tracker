@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, status
 from .data.database import Base, engine
-from .api.v1 import applications, contacts, interviews
+from .api.v1 import applications, contacts, interviews, pipeline_history
 
 app = FastAPI()
 
@@ -17,3 +17,4 @@ async def health_check():
 app.include_router(applications.router)
 app.include_router(contacts.router)
 app.include_router(interviews.router)
+app.include_router(pipeline_history.router)
