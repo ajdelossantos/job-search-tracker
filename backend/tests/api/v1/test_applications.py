@@ -1,4 +1,5 @@
 """Tests for the Applications API. Happy-path testing for now in dev."""
+
 from datetime import date
 from fastapi import status
 from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus

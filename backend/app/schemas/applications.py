@@ -11,6 +11,7 @@ from app.schemas.pipeline_history import PipelineHistoryRead
 
 class ApplicationBase(BaseModel):
     """Base for Application Model."""
+
     date_applied: date
     company: str = Field(min_length=3)
     recruiting_agency: Optional[str] = None
@@ -42,6 +43,7 @@ class ApplicationBase(BaseModel):
 
 class ApplicationCreate(ApplicationBase):
     """Schema for creating a new application."""
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -96,6 +98,7 @@ class ApplicationUpdate(ApplicationBase):
 
 class ApplicationRead(ApplicationBase):
     """Represents an application entity with its associated attributes."""
+
     model_config = ConfigDict(
         from_attributes=True,
         json_schema_extra={

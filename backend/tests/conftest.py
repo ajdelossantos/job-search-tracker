@@ -65,6 +65,7 @@ def db_session(engine):
 @pytest.fixture
 def client(db_session):
     """Creates a new test client."""
+
     # Override FastAPI's get_db with our test session
     def _override_get_db():
         try:
@@ -183,6 +184,7 @@ def make_pipeline_history(db_session, make_application):
         return obj
 
     return _make
+
 
 # ---- Optional: compatibility aliases if you referenced get_test_* elsewhere ----
 # @pytest.fixture

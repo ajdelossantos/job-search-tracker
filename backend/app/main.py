@@ -8,6 +8,7 @@ app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
+
 @app.get("/health-check", status_code=status.HTTP_200_OK, tags=["Health"])
 async def health_check():
     """Stubbed health check for testing."""

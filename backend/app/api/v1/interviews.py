@@ -8,7 +8,12 @@ from starlette import status
 
 from app.data.database import SessionLocal
 from app.models.models import Applications, Interviews
-from app.schemas.interviews import InterviewCreate, InterviewRead, InterviewUpdate, InterviewCreateFlat
+from app.schemas.interviews import (
+    InterviewCreate,
+    InterviewRead,
+    InterviewUpdate,
+    InterviewCreateFlat,
+)
 from app.services.interviews_service import ensure_aware_utc
 
 router = APIRouter(prefix="/api/v1", tags=["Interviews"])
@@ -136,7 +141,12 @@ async def list_interviews(
     if application_id:
         query = query.filter(Interviews.application_id == application_id)
 
-    interviews = query.order_by(Interviews.scheduled_date.asc()).limit(limit).offset(offset).all()
+    interviews = (
+        query.order_by(Interviews.scheduled_date.asc())
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
 
     return [ensure_aware_utc(i) for i in interviews]
 
@@ -228,7 +238,7 @@ async def update_interview(
     for k, v in data.items():
         setattr(interview, k, v)
 
-    db.add(interview )
+    db.add(interview)
     db.commit()
     db.refresh(interview)
 

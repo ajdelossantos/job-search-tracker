@@ -8,6 +8,7 @@ DATABASE_URL = "sqlite:///./app/data/jobsapp.db"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
+
 @event.listens_for(engine, "connect")
 def _set_sqlite_pragma(dbapi_connection, connection_record):
     """
@@ -19,9 +20,11 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.execute("PRAGMA foreign_keys=ON;")
         cursor.close()
 
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
 
 def get_db():
     """Get database session."""

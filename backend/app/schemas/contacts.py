@@ -8,6 +8,7 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 class ContactBase(BaseModel):
     """Base for Contact model."""
+
     name: str = Field(min_length=3)
     company: str = Field(min_length=3)
     email: Optional[EmailStr] = None
@@ -17,22 +18,27 @@ class ContactBase(BaseModel):
     phone: Optional[PhoneNumber] = None
     notes: Optional[str] = None
 
+
 class ContactCreate(ContactBase):
     """Schema for creating a new contact."""
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "name": "Jordan Quux",
-            "company": "Acme",
-            "email": "jordan@acme.com",
-            "title": "Recruiter",
-            "url": "https://linkedin.com/in/jordan",
-            "role": "Recruiter",
-            "phone": "+15125551234",
-            "notes": "Follow up in a week",
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "name": "Jordan Quux",
+                "company": "Acme",
+                "email": "jordan@acme.com",
+                "title": "Recruiter",
+                "url": "https://linkedin.com/in/jordan",
+                "role": "Recruiter",
+                "phone": "+15125551234",
+                "notes": "Follow up in a week",
+            }
         }
-    })
+    )
 
     application_ids: List[int] = Field(default_factory=list)
+
 
 class ContactUpdate(ContactBase):
     """Schema for updating an existing contact."""
@@ -45,18 +51,19 @@ class ContactUpdate(ContactBase):
 
 class ContactRead(ContactBase):
     """Represents a contact entity with its associated attributes."""
+
     model_config = ConfigDict(
         from_attributes=True,
         json_schema_extra={
             "example": {
-              "name": "Jordan Quux",
-              "company": "Acme",
-              "email": "jordan@acme.com",
-              "title": "Recruiter",
-              "url": "https://linkedin.com/in/jordan",
-              "role": "Recruiter",
-              "phone": "+15125551234",
-              "notes": "Follow up in a week",
+                "name": "Jordan Quux",
+                "company": "Acme",
+                "email": "jordan@acme.com",
+                "title": "Recruiter",
+                "url": "https://linkedin.com/in/jordan",
+                "role": "Recruiter",
+                "phone": "+15125551234",
+                "notes": "Follow up in a week",
             }
         },
     )

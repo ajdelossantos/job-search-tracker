@@ -8,6 +8,7 @@ from ..core.enums import PipelineStatus
 
 class PipelineHistoryBase(BaseModel):
     """Base schema for PipelineHistory."""
+
     from_status: Optional[PipelineStatus] = Field(
         default=None,
         description="Previous status (nullable for first transition).",
@@ -25,6 +26,7 @@ class PipelineHistoryBase(BaseModel):
 
 class PipelineHistoryCreate(PipelineHistoryBase):
     """Schema for creating a new pipeline history record. For nested POST; application_id comes from the path."""
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -39,21 +41,26 @@ class PipelineHistoryCreate(PipelineHistoryBase):
 
 class PipelineHistoryCreateFlat(PipelineHistoryBase):
     """Schema for creating a new pipeline history record (flat)."""
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "from_status": PipelineStatus.WILL_APPLY.value,
-            "to_status": PipelineStatus.APPLIED.value,
-            "note": "Applied via company website",
-        }
-    })
 
-    application_id: int = Field(..., description="Application id to attach this history to.")
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "from_status": PipelineStatus.WILL_APPLY.value,
+                "to_status": PipelineStatus.APPLIED.value,
+                "note": "Applied via company website",
+            }
+        }
+    )
+
+    application_id: int = Field(
+        ..., description="Application id to attach this history to."
+    )
 
 
 class PipelineHistoryUpdate(BaseModel):
     """
     Schema for updating a pipeline history record.
-    
+
     Only `note` may be updated. Attempts to change status fields are ignored by the router.
     """
 
@@ -75,6 +82,7 @@ class PipelineHistoryUpdate(BaseModel):
 
 class PipelineHistoryRead(PipelineHistoryBase):
     """Schema for pipeline history with all fields."""
+
     model_config = ConfigDict(
         from_attributes=True,
         json_schema_extra={

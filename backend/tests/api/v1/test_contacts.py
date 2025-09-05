@@ -1,4 +1,5 @@
 """Tests for contact API endpoints."""
+
 from datetime import date
 from fastapi import status
 from app.core.enums import JobLocation, PipelineStatus, ResolutionStatus
@@ -92,8 +93,9 @@ def test_contact_application_ids_reflect_relationship(client, db_session):
     assert r.json()["application_ids"] == [app["id"]]
 
 
-def test_list_contacts_filtered_by_application_id(client, db_session, make_contact,
-                                                  make_application):
+def test_list_contacts_filtered_by_application_id(
+    client, db_session, make_contact, make_application
+):
     """Test listing contacts filtered by application ID."""
     # create a contact and an application
     c = make_contact(name="Filter Me")

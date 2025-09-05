@@ -8,10 +8,7 @@ from app.data.database import SessionLocal
 from app.models.models import Contacts, Applications
 from app.schemas.contacts import ContactRead, ContactCreate, ContactUpdate
 
-router = APIRouter(
-  prefix="/api/v1/contacts",
-  tags=["Contacts"]
-)
+router = APIRouter(prefix="/api/v1/contacts", tags=["Contacts"])
 
 
 def get_db():
@@ -34,7 +31,7 @@ async def read_contacts(
     offset: int = Query(0, ge=0),
     name: Optional[str] = Query(None),
     company: Optional[str] = Query(None),
-    application_id: Optional[int] = Query(None)
+    application_id: Optional[int] = Query(None),
 ):
     """Read all contacts."""
     query = db.query(Contacts).options(selectinload(Contacts.applications))
@@ -46,8 +43,8 @@ async def read_contacts(
     if application_id:
         query = (
             query.join(Contacts.applications)
-              .filter(Applications.id == application_id)
-              .distinct()
+            .filter(Applications.id == application_id)
+            .distinct()
         )
 
     return query.order_by(Contacts.created_at.desc()).limit(limit).offset(offset).all()
@@ -85,7 +82,9 @@ async def create_contact(db: db_dependency, payload: ContactCreate, response: Re
     contact_model = Contacts(**data)
 
     if application_ids:
-        applications = db.query(Applications).filter(Applications.id.in_(application_ids)).all()
+        applications = (
+            db.query(Applications).filter(Applications.id.in_(application_ids)).all()
+        )
         missing = set(application_ids) - {a.id for a in applications}
         if missing:
             raise HTTPException(
@@ -107,14 +106,18 @@ async def create_contact(db: db_dependency, payload: ContactCreate, response: Re
     return created
 
 
-@router.patch("/{contact_id}", response_model=ContactRead, status_code=status.HTTP_200_OK)
-async def update_contact(db: db_dependency, payload: ContactUpdate, contact_id: int = Path(gt=0)):
+@router.patch(
+    "/{contact_id}", response_model=ContactRead, status_code=status.HTTP_200_OK
+)
+async def update_contact(
+    db: db_dependency, payload: ContactUpdate, contact_id: int = Path(gt=0)
+):
     """Update a contact by ID."""
     contact_model = (
         db.query(Contacts)
-          .options(selectinload(Contacts.applications))
-          .filter(Contacts.id == contact_id)
-          .first()
+        .options(selectinload(Contacts.applications))
+        .filter(Contacts.id == contact_id)
+        .first()
     )
 
     if contact_model is None:
