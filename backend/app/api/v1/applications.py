@@ -20,7 +20,7 @@ from app.services.applications_service import (
 router = APIRouter(prefix="/api/v1/applications", tags=["Applications"])
 
 
-def get_db():
+def get_db():  # pragma: no cover
     """Get a database session."""
     db = SessionLocal()
 

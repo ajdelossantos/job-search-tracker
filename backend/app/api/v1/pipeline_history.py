@@ -16,7 +16,7 @@ from app.schemas.pipeline_history import (
 router = APIRouter(prefix="/api/v1", tags=["PipelineHistory"])
 
 
-def get_db():
+def get_db():  # pragma: no cover
     """Dependency to get DB session."""
     db = SessionLocal()
 

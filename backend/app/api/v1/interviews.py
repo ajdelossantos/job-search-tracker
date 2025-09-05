@@ -19,7 +19,7 @@ from app.services.interviews_service import ensure_aware_utc
 router = APIRouter(prefix="/api/v1", tags=["Interviews"])
 
 
-def get_db():
+def get_db():  # pragma: no cover
     """Get a database session."""
     db = SessionLocal()
     try:

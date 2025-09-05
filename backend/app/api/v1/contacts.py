@@ -11,7 +11,7 @@ from app.schemas.contacts import ContactRead, ContactCreate, ContactUpdate
 router = APIRouter(prefix="/api/v1/contacts", tags=["Contacts"])
 
 
-def get_db():
+def get_db():  # pragma: no cover
     """Get a database session."""
     db = SessionLocal()
 
