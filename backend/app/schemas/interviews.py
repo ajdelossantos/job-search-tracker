@@ -63,7 +63,9 @@ class InterviewUpdate(BaseModel):
     @model_validator(mode="after")
     def _tz_required_if_present(self):
         """Ensure scheduled_date is timezone-aware if present."""
-        if self.scheduled_date is not None and self.scheduled_date.tzinfo is None:  # pylint: disable=E1101
+        if (
+            self.scheduled_date is not None and self.scheduled_date.tzinfo is None
+        ):  # pylint: disable=E1101
             raise ValueError("scheduled_date must be timezone-aware (e.g., '...Z').")
         return self
 
