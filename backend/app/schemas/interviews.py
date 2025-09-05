@@ -21,7 +21,7 @@ class InterviewBase(BaseModel):
 
 
 class InterviewCreateFlat(InterviewBase):
-    """Schema for creating a new Interview."""
+    """Schema for creating a new Interview (flat)."""
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "scheduled_date": "2025-09-05T19:00:00Z",
@@ -34,7 +34,7 @@ class InterviewCreateFlat(InterviewBase):
 
 
 class InterviewCreate(InterviewBase):
-    """For nested POST; application_id comes from the path.Schema for creating a new Interview."""
+    """Schema for creating a new Interview. For nested POST; application_id comes from the path."""
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "application_id": 69,
