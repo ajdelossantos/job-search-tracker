@@ -47,7 +47,7 @@ def test_create_pipeline_history_nested_missing_app_returns_404(client):
     assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_list_pipeline_history_by_application_nested_and_flat(
+def test_list_pipeline_histories_by_application_nested_and_flat(
     client, make_application, make_pipeline_history
 ):
     """LIST nested and flat (filtered) show the same rows in reverse chronological order."""
@@ -98,25 +98,31 @@ def test_get_pipeline_history_by_id(client, make_pipeline_history):
     assert body["to_status"] == PipelineStatus.APPLIED.value
 
 
-def test_patch_pipeline_history_allows_notes_only(client, make_pipeline_history):
-    """PATCH allows updating the note; attempts to change statuses are ignored."""
+def test_patch_pipeline_history_updates_note_only(client, make_pipeline_history):
+    """PATCH updates the note when valid payload is provided."""
     hist = make_pipeline_history(
         from_status=PipelineStatus.APPLIED,
         to_status=PipelineStatus.STAGE_1,
         note="orig",
     )
+    r = client.patch(f"/api/v1/pipeline-history/{hist.id}", json={"note": "updated"})
+    assert r.status_code == 200
+    assert r.json()["note"] == "updated"
+    assert r.json()["to_status"] == PipelineStatus.STAGE_1.value
 
-    # Try to change to_status (should be ignored by router) and update note (allowed)
+
+def test_patch_pipeline_history_rejects_status_fields(client, make_pipeline_history):
+    """PATCH with forbidden fields (e.g. to_status) returns 422."""
+    hist = make_pipeline_history(
+        from_status=PipelineStatus.APPLIED,
+        to_status=PipelineStatus.STAGE_1,
+        note="orig",
+    )
     r = client.patch(
         f"/api/v1/pipeline-history/{hist.id}",
         json={"to_status": PipelineStatus.STAGE_2.value, "note": "updated"},
     )
-    assert r.status_code == 200
-    body = r.json()
-    # Note updated
-    assert body["note"] == "updated"
-    # Status unchanged
-    assert body["to_status"] == PipelineStatus.STAGE_1.value
+    assert r.status_code == 422
 
 
 def test_delete_pipeline_history_then_404_on_get(client, make_pipeline_history):
