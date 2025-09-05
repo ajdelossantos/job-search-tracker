@@ -47,8 +47,12 @@ def engine(_tmp_db_path):
         cur.close()
 
     Base.metadata.create_all(bind=engine)
-    yield engine
-    Base.metadata.drop_all(bind=engine)
+
+    try:
+        yield engine
+    finally:
+        Base.metadata.drop_all(bind=engine)
+        engine.dispose()  # <— ensures connections are closed
 
 
 @pytest.fixture
