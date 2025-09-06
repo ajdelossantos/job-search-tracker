@@ -9,11 +9,24 @@ so routers stay thin and the audit trail remains correct.
 - DELETE: delete via ORM instance so ON DELETE CASCADE / relationship cascades take effect.
 """
 
+from datetime import timezone
 from typing import Optional
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.models import Applications, PipelineHistory
 from app.schemas.applications import ApplicationCreate, ApplicationUpdate
+
+
+def _normalize_nested_interviews(app: Optional[Applications]) -> Optional[Applications]:
+    """Ensure all nested interview timestamps are tz-aware to avoid response 500s."""
+    if app is None:
+        return None
+    for iv in getattr(app, "interviews", []) or []:
+        dt = getattr(iv, "scheduled_date", None)
+        # Only coerce if naive
+        if dt is not None and dt.tzinfo is None:
+            iv.scheduled_date = dt.replace(tzinfo=timezone.utc)
+    return app
 
 
 def _load_app_with_relations(db: Session, application_id: int) -> Applications:
@@ -29,7 +42,7 @@ def _load_app_with_relations(db: Session, application_id: int) -> Applications:
     )
 
     assert application is not None  # appease mypy: we only call with a known id
-    return application
+    return _normalize_nested_interviews(application)
 
 
 def create_application_with_history(
