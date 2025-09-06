@@ -4,7 +4,11 @@ from fastapi import FastAPI, status
 from .data.database import Base, engine
 from .api.v1 import applications, contacts, interviews, pipeline_history
 
-app = FastAPI()
+app = FastAPI(
+    title="Job Search Tracker API",
+    version="1.0.0",
+    description="REST API for managing job applications, contacts, interviews, and pipeline history.",
+)
 
 Base.metadata.create_all(bind=engine)
 
