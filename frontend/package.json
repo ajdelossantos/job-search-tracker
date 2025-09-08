@@ -6,22 +6,28 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "openapi-ts": "openapi-ts"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.87.1",
+    "next": "15.5.0",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "next": "15.5.0"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@hey-api/openapi-ts": "0.82.5",
+    "@tailwindcss/postcss": "^4",
+    "@tanstack/react-query-devtools": "^5.87.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.0",
-    "@eslint/eslintrc": "^3"
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
