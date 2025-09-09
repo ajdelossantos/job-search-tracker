@@ -6,7 +6,7 @@ import { getApplicationsOptions } from "@/lib/api/applications";
 export default async function Home() {
   const queryClient = getQueryClient();
 
-  await queryClient.prefetchQuery(getApplicationsOptions());
+  await queryClient.ensureQueryData(getApplicationsOptions());
 
   return (
     <div className="flex min-h-screen flex-col items-left justify-center py-2 px-8">
