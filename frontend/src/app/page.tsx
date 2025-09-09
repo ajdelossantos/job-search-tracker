@@ -1,12 +1,12 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { ApplicationsHome } from "@/components/ApplicationsHome";
 import { getQueryClient } from "@/lib/utils/get-query-client";
-import { applicationsQueryOptions } from "@/lib/api/applications";
+import { getApplicationsOptions } from "@/lib/api/applications";
 
-export default function Home() {
+export default async function Home() {
   const queryClient = getQueryClient();
 
-  void queryClient.prefetchQuery(applicationsQueryOptions);
+  await queryClient.prefetchQuery(getApplicationsOptions());
 
   return (
     <div className="flex min-h-screen flex-col items-left justify-center py-2 px-8">
