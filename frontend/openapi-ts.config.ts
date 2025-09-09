@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [
     "@hey-api/typescript",
     {
-      name: '@hey-api/client-next',
-      runtimeConfigPath: './src/lib/utils/hey-api.ts',
+      name: "@hey-api/client-next",
+      runtimeConfigPath: "./src/lib/utils/hey-api.ts",
     },
     "@tanstack/react-query",
   ],

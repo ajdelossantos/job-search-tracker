@@ -1,4 +1,4 @@
-import '@/client' // ensures generated client (and runtime config) is loaded once
+import "@/client"; // ensures generated client (and runtime config) is loaded once
 import Providers from "@/components/providers";
 import { Roboto } from "next/font/google";
 import type { Metadata } from "next";
