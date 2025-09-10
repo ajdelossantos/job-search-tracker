@@ -1,1 +1,2 @@
 export { readApplicationsApiV1ApplicationsGetOptions as getApplicationsOptions } from "@/client/@tanstack/react-query.gen";
+export { readApplicationApiV1ApplicationsApplicationIdGetOptions as getApplicationByIdOptions } from "@/client/@tanstack/react-query.gen";
