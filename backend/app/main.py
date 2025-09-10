@@ -8,7 +8,8 @@ from .api.v1 import applications, contacts, interviews, pipeline_history
 app = FastAPI(
     title="Job Search Tracker API",
     version="1.0.0",
-    description="REST API for managing job applications, contacts, interviews, and pipeline history.",
+    description="REST API for managing job applications, contacts, interviews,"
+    "and pipeline history.",
 )
 
 """

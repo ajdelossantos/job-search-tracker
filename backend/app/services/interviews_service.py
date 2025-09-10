@@ -1,4 +1,4 @@
-"""Services and helpers for"""
+"""Services and helpers for Interviews."""
 
 from datetime import timezone
 from app.models.models import Interviews

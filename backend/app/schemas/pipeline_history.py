@@ -25,7 +25,10 @@ class PipelineHistoryBase(BaseModel):
 
 
 class PipelineHistoryCreate(PipelineHistoryBase):
-    """Schema for creating a new pipeline history record. For nested POST; application_id comes from the path."""
+    """
+    Schema for creating a new pipeline history record.
+    For nested POST; application_id comes from the path.
+    """
 
     model_config = ConfigDict(
         json_schema_extra={

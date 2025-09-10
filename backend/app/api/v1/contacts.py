@@ -24,7 +24,20 @@ def get_db():  # pragma: no cover
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-@router.get("/", response_model=List[ContactRead], status_code=status.HTTP_200_OK)
+@router.get(
+    "/",
+    response_model=List[ContactRead],
+    status_code=status.HTTP_200_OK,
+    summary="Read all contacts.",
+    description=(
+        "Read all contacts with optional filtering by name, company, or linked application ID.\n\n"
+        "Example:\n"
+        "```\n"
+        "GET /api/v1/contacts?name=John&company=Acme&application_id=42&limit=20&offset=0\n"
+        "```\n"
+        "Query params: `name`, `company`, `application_id`, `limit`, `offset`."
+    ),
+)
 async def read_contacts(
     db: db_dependency,
     limit: int = Query(10, ge=1, le=200),
@@ -50,7 +63,13 @@ async def read_contacts(
     return query.order_by(Contacts.created_at.desc()).limit(limit).offset(offset).all()
 
 
-@router.get("/{contact_id}", response_model=ContactRead, status_code=status.HTTP_200_OK)
+@router.get(
+    "/{contact_id}",
+    response_model=ContactRead,
+    status_code=status.HTTP_200_OK,
+    summary="Read a contact by ID.",
+    description="Read a contact by its unique ID.",
+)
 async def read_contact(db: db_dependency, contact_id: int = Path(gt=0)):
     """Read a contact by ID."""
     contact_model = (
@@ -65,7 +84,13 @@ async def read_contact(db: db_dependency, contact_id: int = Path(gt=0)):
     return contact_model
 
 
-@router.post("/", response_model=ContactRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=ContactRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new contact.",
+    description="Create a new contact, optionally linking to existing applications.",
+)
 async def create_contact(db: db_dependency, payload: ContactCreate, response: Response):
     """Create a new contact."""
     data = payload.model_dump()
@@ -110,7 +135,14 @@ async def create_contact(db: db_dependency, payload: ContactCreate, response: Re
 
 
 @router.patch(
-    "/{contact_id}", response_model=ContactRead, status_code=status.HTTP_200_OK
+    "/{contact_id}",
+    response_model=ContactRead,
+    status_code=status.HTTP_200_OK,
+    summary="Update a contact by ID.",
+    description=(
+        "Update a contact by its ID. You can also manage linked applications using "
+        "`application_ids_add` and `application_ids_remove` fields to add or remove links."
+    ),
 )
 async def update_contact(
     db: db_dependency, payload: ContactUpdate, contact_id: int = Path(gt=0)
@@ -175,7 +207,12 @@ async def update_contact(
     return updated
 
 
-@router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{contact_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a contact by ID.",
+    description="Delete a contact by its ID.",
+)
 async def delete_contact(db: db_dependency, contact_id: int = Path(gt=0)):
     """Delete a contact by ID."""
     contact_model = db.query(Contacts).filter(Contacts.id == contact_id).first()
