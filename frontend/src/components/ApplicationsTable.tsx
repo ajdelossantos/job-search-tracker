@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from 'next/link'
 import { getApplicationsOptions } from "@/lib/api/applications";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ApplicationRead } from "@/client";
+import { ApplicationRead, PipelineStatus } from "@/client";
+import { labelOfPipelineStatus } from "@/lib/utils/enums";
 
 type ApplicationsTableProps = { initialLimit?: number }
 
@@ -65,7 +66,7 @@ export default function ApplicationsTable({ initialLimit = 50 }: ApplicationsTab
                   </Link>
                 </td>
                 <td className="px-3 py-2">{a.role}</td>
-                <td className="px-3 py-2">{a.pipeline_status}</td>
+                <td className="px-3 py-2">{labelOfPipelineStatus(a.pipeline_status as PipelineStatus)}</td>
                 <td className="px-3 py-2">
                   {a.updated_at ? new Date(a.updated_at).toLocaleString() : '—'}
                 </td>
