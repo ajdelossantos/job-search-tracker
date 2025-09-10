@@ -1,24 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import Link from 'next/link'
+import Link from "next/link";
 import { getApplicationsOptions } from "@/lib/api/applications";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ApplicationRead, PipelineStatus } from "@/client";
 import { labelOfPipelineStatus } from "@/lib/utils/enums";
 
-type ApplicationsTableProps = { initialLimit?: number }
+type ApplicationsTableProps = { initialLimit?: number };
 
-export default function ApplicationsTable({ initialLimit = 50 }: ApplicationsTableProps) {
-  const [page, setPage] = useState(0)
-  const limit = initialLimit
-  const offset = page * limit
+export default function ApplicationsTable({
+  initialLimit = 50,
+}: ApplicationsTableProps) {
+  const [page, setPage] = useState(0);
+  const limit = initialLimit;
+  const offset = page * limit;
   const { data, isLoading, isError, error, refetch, isFetching } =
-    useSuspenseQuery(getApplicationsOptions({ query: { limit, offset } }))
+    useSuspenseQuery(getApplicationsOptions({ query: { limit, offset } }));
 
-  console.log('ApplicationsTable data:', data)
+  console.log("ApplicationsTable data:", data);
 
-  if (isLoading) return <div className="p-4">Loading applications…</div>
+  if (isLoading) return <div className="p-4">Loading applications…</div>;
 
   if (isError) {
     return (
@@ -32,11 +34,11 @@ export default function ApplicationsTable({ initialLimit = 50 }: ApplicationsTab
           {String((error as Error)?.message ?? error)}
         </pre>
       </div>
-    )
+    );
   }
 
-  const items: ApplicationRead[] = data as unknown as ApplicationRead[] ?? [] // hey-api usually wraps in { data, ... }
-  const total = items.length ?? 0 // if backend returns it; otherwise infer
+  const items: ApplicationRead[] = (data as unknown as ApplicationRead[]) ?? []; // hey-api usually wraps in { data, ... }
+  const total = items.length ?? 0; // if backend returns it; otherwise infer
 
   return (
     <div className="p-4 space-y-3">
@@ -66,9 +68,11 @@ export default function ApplicationsTable({ initialLimit = 50 }: ApplicationsTab
                   </Link>
                 </td>
                 <td className="px-3 py-2">{a.role}</td>
-                <td className="px-3 py-2">{labelOfPipelineStatus(a.pipeline_status as PipelineStatus)}</td>
                 <td className="px-3 py-2">
-                  {a.updated_at ? new Date(a.updated_at).toLocaleString() : '—'}
+                  {labelOfPipelineStatus(a.pipeline_status as PipelineStatus)}
+                </td>
+                <td className="px-3 py-2">
+                  {a.updated_at ? new Date(a.updated_at).toLocaleString() : "—"}
                 </td>
               </tr>
             ))}
@@ -101,5 +105,5 @@ export default function ApplicationsTable({ initialLimit = 50 }: ApplicationsTab
         </button>
       </div>
     </div>
-  )
+  );
 }

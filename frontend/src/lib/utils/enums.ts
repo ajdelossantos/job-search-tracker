@@ -1,13 +1,25 @@
-import type { InterviewType, JobLocation, PipelineStatus, ResolutionStatus } from '@/client/index'
+import type {
+  InterviewType,
+  JobLocation,
+  PipelineStatus,
+  ResolutionStatus,
+} from "@/client/index";
 
-export type { InterviewType, JobLocation, PipelineStatus, ResolutionStatus } from '@/client/index'
+export type {
+  InterviewType,
+  JobLocation,
+  PipelineStatus,
+  ResolutionStatus,
+} from "@/client/index";
 
 /**
  * Generic helper to generate <select> options with types intact
  */
 export function enumOptions<const T extends string>(labels: Record<T, string>) {
-  return (Object.entries(labels) as [T, string][])
-    .map(([value, label]) => ({ value, label }));
+  return (Object.entries(labels) as [T, string][]).map(([value, label]) => ({
+    value,
+    label,
+  }));
 }
 
 export const INTERVIEW_TYPE_LABELS = {
@@ -17,7 +29,7 @@ export const INTERVIEW_TYPE_LABELS = {
   offer: "Offer",
   offer_negotiation: "Offer Negotiation",
   recruiter: "Recruiter",
-  technical: "Technical"
+  technical: "Technical",
 } as const satisfies Record<InterviewType, string>;
 
 export const JOB_LOCATION_LABELS = {
@@ -48,7 +60,8 @@ export const PIPELINE_STATUS_LABELS = {
 
 export const pipelineStatusOptions = enumOptions(PIPELINE_STATUS_LABELS);
 
-export const labelOfPipelineStatus = (s: PipelineStatus) => PIPELINE_STATUS_LABELS[s];
+export const labelOfPipelineStatus = (s: PipelineStatus) =>
+  PIPELINE_STATUS_LABELS[s];
 
 export function isPipelineStatus(x: unknown): x is PipelineStatus {
   return typeof x === "string" && x in PIPELINE_STATUS_LABELS;
