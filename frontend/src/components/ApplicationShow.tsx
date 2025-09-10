@@ -1,8 +1,9 @@
 'use client'
 
 import { useSuspenseQuery } from '@tanstack/react-query'
-// import ApplicationStatusSelect from '@/components/applications/ApplicationStatusSelect'
+import ApplicationStatusSelect from '@/components/ApplicationStatusSelect'
 import { getApplicationByIdOptions } from '@/lib/api/applications'
+import { PipelineStatus } from '@/lib/utils/enums'
 
 /**
  * Tiny client shell to read cached data and show the status control.
@@ -19,13 +20,10 @@ export default function ApplicationShow({ id }: { id: number }) {
       </h1>
       <div className="flex items-center gap-3">
         <span className="text-sm opacity-70">Pipeline status:</span>
-        {/* <ApplicationStatusSelect
+        <ApplicationStatusSelect
           applicationId={id}
-          current={app.pipeline_status}
-        /> */}
-        <span className="rounded bg-gray-100 px-2 py-1 text-sm font-medium">
-          {app.pipeline_status}
-        </span>
+          current={app.pipeline_status as PipelineStatus}
+        />
       </div>
       {/* v0.1 later: tabs for Interviews / Contacts / History */}
     </div>
