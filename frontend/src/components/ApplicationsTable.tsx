@@ -18,8 +18,6 @@ export default function ApplicationsTable({
   const { data, isLoading, isError, error, refetch, isFetching } =
     useSuspenseQuery(getApplicationsOptions({ query: { limit, offset } }));
 
-  console.log("ApplicationsTable data:", data);
-
   if (isLoading) return <div className="p-4">Loading applications…</div>;
 
   if (isError) {
