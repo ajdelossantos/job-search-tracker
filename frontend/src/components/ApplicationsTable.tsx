@@ -7,7 +7,7 @@ import {
   type ApplicationRead,
 } from "@/lib/api/applications";
 import { DataTable } from "./DataTable";
-import { applicationColumns } from "./columns";
+import { getApplicationColumnsCompact } from "./columns";
 
 type MaybeWrappedArray<T> = T[] | { data: T[] };
 function hasDataArray<T>(x: unknown): x is { data: T[] } {
@@ -47,7 +47,7 @@ export default function ApplicationsTable({
       </div>
 
       <DataTable<ApplicationRead>
-        columns={applicationColumns}
+        columns={getApplicationColumnsCompact()}
         data={items}
         loading={query.isLoading}
         error={
