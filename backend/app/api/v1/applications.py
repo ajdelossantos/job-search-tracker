@@ -15,6 +15,7 @@ from app.services.applications_service import (
     create_application_with_history,
     delete_application_and_history,
     update_application_with_history,
+    normalize_nested_interviews,
 )
 
 router = APIRouter(prefix="/api/v1/applications", tags=["Applications"])
@@ -54,6 +55,9 @@ async def read_applications(
         query.order_by(Applications.created_at.desc()).limit(limit).offset(offset).all()
     )
 
+    for app in items:
+        normalize_nested_interviews(app)
+
     return items
 
 
@@ -80,7 +84,7 @@ async def read_application(db: db_dependency, application_id: int = Path(gt=0)):
     if application_model is None:
         raise HTTPException(status_code=404, detail="Application not found")
 
-    return application_model
+    return normalize_nested_interviews(application_model)
 
 
 @router.post(
