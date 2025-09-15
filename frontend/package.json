@@ -10,8 +10,6 @@
     "format": "prettier --write .",
     "openapi-ts": "openapi-ts",
     "test": "vitest run"
-    "openapi-ts": "openapi-ts",
-    "test": "vitest run"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -35,8 +33,6 @@
     "@hey-api/openapi-ts": "0.82.5",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.87.3",
-    "@testing-library/jest-dom": "^6.8.0",
-    "@testing-library/react": "^16.3.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
