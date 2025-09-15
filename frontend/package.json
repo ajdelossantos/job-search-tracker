@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "openapi-ts": "openapi-ts"
+    "openapi-ts": "openapi-ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.87.1",
@@ -28,6 +29,7 @@
     "eslint-config-next": "15.5.0",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
