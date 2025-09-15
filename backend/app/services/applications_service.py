@@ -17,7 +17,7 @@ from app.models.models import Applications, PipelineHistory
 from app.schemas.applications import ApplicationCreate, ApplicationUpdate
 
 
-def _normalize_nested_interviews(app: Optional[Applications]) -> Optional[Applications]:
+def normalize_nested_interviews(app: Optional[Applications]) -> Optional[Applications]:
     """Ensure all nested interview timestamps are tz-aware to avoid response 500s."""
     if app is None:
         return None
@@ -42,7 +42,7 @@ def _load_app_with_relations(db: Session, application_id: int) -> Applications:
     )
 
     assert application is not None  # appease mypy: we only call with a known id
-    return _normalize_nested_interviews(application)
+    return normalize_nested_interviews(application)
 
 
 def create_application_with_history(
