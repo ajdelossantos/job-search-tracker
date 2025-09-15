@@ -18,15 +18,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={`${roboto.className} antialiased`}>
-        <div className="flex min-h-screen flex-col items-left justify-center py-2">
+    <html lang="en" className="h-full">
+      <body
+        className={`${roboto.className} min-h-screen bg-white text-gray-900 antialiased`}
+      >
+        <div className="grid min-h-screen grid-rows-[4rem_1fr_2rem]">
           <Header />
-          <Providers>{children}</Providers>
+
+          <main className="w-full">
+            <Providers>
+              <div className="app-shell mx-auto w-full max-w-screen-2xl px-6 pt-8 pb-4">
+                {children}
+              </div>
+            </Providers>
+          </main>
+
           <Footer />
         </div>
       </body>
