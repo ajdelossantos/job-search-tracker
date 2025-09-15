@@ -3,15 +3,15 @@
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  ApplicationRead,
   getApplicationByIdOptions,
   getApplicationsOptions,
   updateApplicationStatus,
+  type ApplicationRead,
+  type PipelineStatus,
 } from "@/lib/api/applications";
-import { PipelineStatus, pipelineStatusOptions } from "@/lib/utils/enums";
+import { pipelineStatusOptions } from "@/lib/utils/enums";
 
 type MaybeWrapped<T> = T | { data: T };
-
 function hasData<T>(x: unknown): x is { data: T } {
   return typeof x === "object" && x !== null && "data" in x;
 }
@@ -25,9 +25,9 @@ export default function ApplicationStatusSelect({
 }) {
   const qc = useQueryClient();
   const [value, setValue] = React.useState<PipelineStatus>(current);
-
   React.useEffect(() => setValue(current), [current]);
 
+  // derive stable keys from the generated helpers you re-exported
   const appKey = getApplicationByIdOptions({
     path: { application_id: applicationId },
   }).queryKey;
@@ -58,6 +58,7 @@ export default function ApplicationStatusSelect({
     onError: (_e, _vars, ctx) => {
       if (ctx?.prev)
         qc.setQueryData<MaybeWrapped<ApplicationRead>>(appKey, ctx.prev);
+      // replace with toasts later
       alert("Failed to update status");
     },
 
