@@ -13,10 +13,8 @@ export default async function Home() {
   );
 
   return (
-    <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <ApplicationsTable initialLimit={PAGE_SIZE} />
-      </HydrationBoundary>
-    </main>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ApplicationsTable initialLimit={PAGE_SIZE} />
+    </HydrationBoundary>
   );
 }
