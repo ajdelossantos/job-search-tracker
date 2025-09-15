@@ -114,7 +114,7 @@ function buildRegistry(
           return `${fmtCurrency.format(min)}–${fmtCurrency.format(max)}`;
         return min != null
           ? `≥ ${fmtCurrency.format(min)}`
-          : `≤ ${fmtCurrency.format(max as number)}`;
+          : `≤ ${fmtCurrency.format(max!)}`;
       },
     },
 
