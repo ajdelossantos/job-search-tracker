@@ -6,9 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "test": "vitest run",
     "lint": "eslint",
-    "test": "vitest run",
     "format": "prettier --write .",
     "openapi-ts": "openapi-ts",
     "test": "vitest run"
