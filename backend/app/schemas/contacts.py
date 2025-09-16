@@ -33,6 +33,7 @@ class ContactCreate(ContactBase):
                 "role": "Recruiter",
                 "phone": "+15125551234",
                 "notes": "Follow up in a week",
+                "application_ids": [],
             }
         }
     )
