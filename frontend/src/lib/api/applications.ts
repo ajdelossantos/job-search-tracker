@@ -22,11 +22,14 @@ export type {
  * @returns A promise that resolves to the updated application data
  * @throws Will throw an error if the request fails or the application is not found
  */
-export async function patchApplication(id: number, body: Partial<ApplicationUpdate>) {
+export async function patchApplication(
+  id: number,
+  body: Partial<ApplicationUpdate>,
+) {
   return client.request<ApplicationRead>({
     method: "PATCH",
     url: `/api/v1/applications/${id}`,
-    body,
+    body: body satisfies ApplicationUpdate,
   });
 }
 
