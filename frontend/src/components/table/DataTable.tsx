@@ -1,4 +1,3 @@
-// src/components/applications/DataTable.tsx
 "use client";
 
 import {
@@ -17,6 +16,34 @@ import {
 } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 
+/**
+ * A reusable data table component built with React Table (TanStack Table).
+ *
+ * @template TData - The type of data objects displayed in the table rows
+ *
+ * @param columns - Array of column definitions that specify how data should be displayed
+ * @param data - Array of data objects to display in the table
+ * @param loading - Optional boolean to show loading state
+ * @param error - Optional error message to display when data fetching fails
+ * @param emptyText - Optional custom text to show when no data is available (defaults to "No results")
+ *
+ * @returns A table component with sticky headers, responsive design, and built-in loading/error/empty states
+ *
+ * @example
+ * ```tsx
+ * const columns: ColumnDef<User>[] = [
+ *   { accessorKey: 'name', header: 'Name' },
+ *   { accessorKey: 'email', header: 'Email' }
+ * ];
+ *
+ * <DataTable
+ *   columns={columns}
+ *   data={users}
+ *   loading={isLoading}
+ *   error={error}
+ * />
+ * ```
+ */
 export function DataTable<TData>({
   columns,
   data,
@@ -40,17 +67,13 @@ export function DataTable<TData>({
   return (
     <div className="overflow-x-auto rounded border">
       <Table>
-        {/* keep thead non-sticky; make each th sticky instead */}
         <TableHeader className="bg-white">
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id}>
               {hg.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className={cn(
-                    "sticky z-10 bg-white", // stick under 4rem app header
-                    "whitespace-nowrap", // keep labels on one line
-                  )}
+                  className={cn("sticky z-10 bg-white", "whitespace-nowrap")}
                 >
                   {header.isPlaceholder
                     ? null

@@ -120,7 +120,7 @@ function buildRegistry(
           target: number | null;
         }>();
         let out = "—";
-        if (min == null && max == null && target == null) out = "--—";
+        if (min == null && max == null && target == null) out = "---";
         else if (target != null) out = fmtCurrency.format(target);
         else if (min != null && max != null)
           out = `${fmtCurrency.format(min)}–${fmtCurrency.format(max)}`;
@@ -186,7 +186,7 @@ function buildRegistry(
       accessorKey: "resolution_status",
       cell: ({ getValue }) => {
         const v = getValue<ResolutionStatus>();
-        return v ? <ResolutionBadge value={v} /> : "--—";
+        return v ? <ResolutionBadge value={v} /> : "---";
       },
     },
 
