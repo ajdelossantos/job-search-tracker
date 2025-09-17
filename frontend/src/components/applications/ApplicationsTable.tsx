@@ -6,8 +6,8 @@ import {
   getApplicationsOptions,
   type ApplicationRead,
 } from "@/lib/api/applications";
-import { DataTable } from "./DataTable";
-import { getApplicationColumnsCompact } from "./columns";
+import { DataTable } from "@/components/table/DataTable";
+import { getApplicationColumnsCompact } from "@/components/table/columns";
 
 type MaybeWrappedArray<T> = T[] | { data: T[] };
 function hasDataArray<T>(x: unknown): x is { data: T[] } {

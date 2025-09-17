@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Briefcase, Users, Calendar } from "lucide-react";
+import TimezoneSelect from "@/components/timezone/TimezoneSelect";
 
 export default function Header() {
   return (
@@ -30,6 +31,7 @@ export default function Header() {
             <Calendar className="h-4 w-4" aria-hidden />
             Interviews
           </Link>
+          <TimezoneSelect />
         </nav>
       </div>
     </header>

@@ -1,5 +1,5 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import ApplicationsTable from "@/components/ApplicationsTable";
+import ApplicationsTable from "@/components/applications/ApplicationsTable";
 import { getQueryClient } from "@/lib/utils/get-query-client";
 import { getApplicationsOptions } from "@/lib/api/applications";
 
