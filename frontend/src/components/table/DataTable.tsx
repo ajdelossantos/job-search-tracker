@@ -15,6 +15,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
+import { cn } from "@/lib/utils";
 
 export function DataTable<TData>({
   columns,
@@ -39,11 +40,18 @@ export function DataTable<TData>({
   return (
     <div className="overflow-x-auto rounded border">
       <Table>
-        <TableHeader>
+        {/* keep thead non-sticky; make each th sticky instead */}
+        <TableHeader className="bg-white">
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id}>
               {hg.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead
+                  key={header.id}
+                  className={cn(
+                    "sticky z-10 bg-white", // stick under 4rem app header
+                    "whitespace-nowrap", // keep labels on one line
+                  )}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(

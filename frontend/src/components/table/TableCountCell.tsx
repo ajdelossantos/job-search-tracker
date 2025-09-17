@@ -1,4 +1,4 @@
-import { AppTabKey } from "@/components/columns";
+import { AppTabKey } from "@/components/table/columns";
 
 export function CountCell({
   id,

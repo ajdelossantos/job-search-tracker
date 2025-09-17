@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/utils/get-query-client";
 import { getApplicationByIdOptions } from "@/lib/api/applications";
-import ApplicationShow from "@/components/ApplicationShow";
+import ApplicationShow from "@/components/applications/ApplicationShow";
 
 type PageProps = { params: { id: string } };
 

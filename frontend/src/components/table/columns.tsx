@@ -1,24 +1,19 @@
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ApplicationRead } from "@/lib/api/applications";
-import {
-  PIPELINE_STATUS_LABELS,
-  JOB_LOCATION_LABELS,
-  RESOLUTION_STATUS_LABELS,
-} from "@/lib/utils/enums";
-import { CountCell } from "@/components/TableCountCell";
-import { getFallbackText } from "@/lib/utils/text-helpers";
+import type { ResolutionStatus } from "@/lib/utils/enums";
+import { PIPELINE_STATUS_LABELS, JOB_LOCATION_LABELS } from "@/lib/utils/enums";
+import { CountCell } from "@/components/table/TableCountCell";
+import { displayUrl, getFallbackText } from "@/lib/utils/text-helpers";
+import TableDateCell from "@/components/table/TableDateCell";
+import { StatusBadge } from "@/components/applications/StatusBadge";
+import { ResolutionBadge } from "@/components/applications/ResolutionBadge";
 
 const fmtCurrency = new Intl.NumberFormat(undefined, {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
-const formatDate = (iso?: string | null, showTime = false) => {
-  if (!iso) return "---";
-  const d = new Date(iso);
-  return showTime ? d.toLocaleString() : d.toLocaleDateString();
-};
 
 /** Stable IDs for picking columns */
 export const COLUMN_IDS = [
@@ -82,7 +77,7 @@ function buildRegistry(
       accessorKey: "pipeline_status",
       cell: ({ getValue }) => {
         const v = getValue<keyof typeof PIPELINE_STATUS_LABELS | undefined>();
-        return v ? PIPELINE_STATUS_LABELS[v] : "---";
+        return v ? <StatusBadge value={v} /> : "---";
       },
     },
 
@@ -102,19 +97,39 @@ function buildRegistry(
         max: row.salary_max ?? null,
         target: row.salary_target ?? null,
       }),
+      sortingFn: (rowA, rowB, columnId) => {
+        const a = rowA.getValue(columnId) as {
+          min: number | null;
+          max: number | null;
+          target: number | null;
+        };
+        const b = rowB.getValue(columnId) as typeof a;
+        const score = (x: typeof a) =>
+          x.target ??
+          (x.min != null && x.max != null
+            ? (x.min + x.max) / 2
+            : (x.min ?? x.max ?? Number.NEGATIVE_INFINITY));
+        const av = score(a),
+          bv = score(b);
+        return av === bv ? 0 : av < bv ? -1 : 1;
+      },
       cell: ({ getValue }) => {
         const { min, max, target } = getValue<{
           min: number | null;
           max: number | null;
           target: number | null;
         }>();
-        if (min == null && max == null && target == null) return "---";
-        if (target != null) return fmtCurrency.format(target);
-        if (min != null && max != null)
-          return `${fmtCurrency.format(min)}–${fmtCurrency.format(max)}`;
-        return min != null
-          ? `≥ ${fmtCurrency.format(min)}`
-          : `≤ ${fmtCurrency.format(max!)}`;
+        let out = "—";
+        if (min == null && max == null && target == null) out = "--—";
+        else if (target != null) out = fmtCurrency.format(target);
+        else if (min != null && max != null)
+          out = `${fmtCurrency.format(min)}–${fmtCurrency.format(max)}`;
+        else
+          out =
+            min != null
+              ? `≥ ${fmtCurrency.format(min)}`
+              : `≤ ${fmtCurrency.format(max as number)}`;
+        return <span className="block tabular-nums text-right">{out}</span>;
       },
     },
 
@@ -124,16 +139,16 @@ function buildRegistry(
       accessorKey: "url",
       cell: ({ getValue }) => {
         const url = getValue<string | null | undefined>();
-        if (!url) return "---";
+        if (!url) return "—";
         return (
           <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline truncate inline-block max-w-[18ch] align-middle"
+            className="underline truncate inline-block max-w-[22ch] align-middle"
             title={url}
           >
-            {url}
+            {displayUrl(url)}
           </a>
         );
       },
@@ -157,14 +172,12 @@ function buildRegistry(
       id: "next_follow_up_date",
       header: "Follow Up",
       accessorKey: "next_follow_up_date",
-      cell: ({ getValue }) => {
-        const iso = getValue<string | null | undefined>();
-        return (
-          <span title={iso ?? ""}>
-            {formatDate(iso, true /* time shown here */)}
-          </span>
-        );
-      },
+      cell: ({ getValue }) => (
+        <TableDateCell
+          iso={getValue<string | null | undefined>()}
+          showTime={true}
+        />
+      ),
     },
 
     resolution_status: {
@@ -172,8 +185,8 @@ function buildRegistry(
       header: "Resolution",
       accessorKey: "resolution_status",
       cell: ({ getValue }) => {
-        const v = getValue<keyof typeof RESOLUTION_STATUS_LABELS | undefined>();
-        return v ? RESOLUTION_STATUS_LABELS[v] : "---";
+        const v = getValue<ResolutionStatus>();
+        return v ? <ResolutionBadge value={v} /> : "--—";
       },
     },
 
@@ -181,30 +194,36 @@ function buildRegistry(
       id: "resolution_date",
       header: "Resolution Date",
       accessorKey: "resolution_date",
-      cell: ({ getValue }) => {
-        const iso = getValue<string | null | undefined>();
-        return <span title={iso ?? ""}>{formatDate(iso, showTimes)}</span>;
-      },
+      cell: ({ getValue }) => (
+        <TableDateCell
+          iso={getValue<string | null | undefined>()}
+          showTime={showTimes}
+        />
+      ),
     },
 
     date_applied: {
       id: "date_applied",
       header: "Applied",
       accessorKey: "date_applied",
-      cell: ({ getValue }) => {
-        const iso = getValue<string>();
-        return <span title={iso}>{formatDate(iso, showTimes)}</span>;
-      },
+      cell: ({ getValue }) => (
+        <TableDateCell
+          iso={getValue<string | null | undefined>()}
+          showTime={showTimes}
+        />
+      ),
     },
 
     updated_at: {
       id: "updated_at",
       header: "Updated",
       accessorKey: "updated_at",
-      cell: ({ getValue }) => {
-        const iso = getValue<string | null | undefined>();
-        return <span title={iso ?? ""}>{formatDate(iso, showTimes)}</span>;
-      },
+      cell: ({ getValue }) => (
+        <TableDateCell
+          iso={getValue<string | null | undefined>()}
+          showTime={showTimes}
+        />
+      ),
     },
 
     notes: {
@@ -291,13 +310,15 @@ export const FULL_ORDER: readonly ApplicationColumnId[] = [
 export const COMPACT_ORDER: readonly ApplicationColumnId[] = [
   "company",
   "role",
+  "url",
   "pipeline_status",
   "job_location",
   "salary_range",
   "date_applied",
-  "updated_at",
+  "next_follow_up_date",
   "interviews_count",
   "contacts_count",
+  "notes",
 ] as const;
 
 /** Picker */

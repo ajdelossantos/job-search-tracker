@@ -1,7 +1,7 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import ApplicationStatusSelect from "@/components/ApplicationStatusSelect";
+import ApplicationStatusSelect from "@/components/applications/ApplicationStatusSelect";
 import { getApplicationByIdOptions } from "@/lib/api/applications";
 import { PipelineStatus } from "@/lib/utils/enums";
 
