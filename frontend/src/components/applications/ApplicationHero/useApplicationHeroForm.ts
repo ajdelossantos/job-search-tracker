@@ -192,10 +192,10 @@ export function buildUpdateDiff(
 export const validators = {
   required:
     (label = "Required") =>
-    (v: string) =>
-      v.trim() ? undefined : label,
-  url: (v: string) => {
-    const t = v.trim();
+    ({ value }: { value: string }) =>
+      value.trim() ? undefined : label,
+  url: ({ value }: { value: string }) => {
+    const t = value.trim();
     if (!t) return undefined;
     try {
       new URL(t);
@@ -204,18 +204,18 @@ export const validators = {
       return "Enter a valid URL";
     }
   },
-  integer: (v: string) => {
-    const t = v.trim();
+  integer: ({ value }: { value: string }) => {
+    const t = value.trim();
     if (!t) return undefined;
     return /^\d+$/.test(t) ? undefined : "Enter a whole number";
   },
-  date: (v: string) => {
-    const t = v.trim();
+  date: ({ value }: { value: string }) => {
+    const t = value.trim();
     if (!t) return undefined;
     return isDateOnly(t) ? undefined : "Enter a date (YYYY-MM-DD)";
   },
-  dateOrDateTime: (v: string) => {
-    const t = v.trim();
+  dateOrDateTime: ({ value }: { value: string }) => {
+    const t = value.trim();
     if (!t) return undefined;
     return isDateOnly(t) || isLocalDateTime(t)
       ? undefined
