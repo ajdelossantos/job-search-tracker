@@ -7,6 +7,7 @@ import {
   createClient,
   createConfig,
 } from "./client";
+import { createClientConfig } from "../lib/utils/hey-api";
 
 /**
  * The `createClientConfig()` function will be called on client initialization
@@ -22,7 +23,9 @@ export type CreateClientConfig<T extends DefaultClientOptions = ClientOptions> =
   ) => Config<Required<DefaultClientOptions> & T>;
 
 export const client = createClient(
-  createConfig<ClientOptions>({
-    baseUrl: "http://127.0.0.1:8000",
-  }),
+  createClientConfig(
+    createConfig<ClientOptions>({
+      baseUrl: "http://127.0.0.1:8000",
+    }),
+  ),
 );

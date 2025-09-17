@@ -454,7 +454,8 @@ export type JobLocation = "hybrid" | "onsite" | "remote";
 
 /**
  * PipelineHistoryCreate
- * Schema for creating a new pipeline history record. For nested POST; application_id comes from the path.
+ * Schema for creating a new pipeline history record.
+ * For nested POST; application_id comes from the path.
  */
 export type PipelineHistoryCreate = {
   /**
