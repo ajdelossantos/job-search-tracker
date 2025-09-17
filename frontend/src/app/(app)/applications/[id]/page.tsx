@@ -4,11 +4,15 @@ import { getQueryClient } from "@/lib/utils/get-query-client";
 import { getApplicationByIdOptions } from "@/lib/api/applications";
 import ApplicationShow from "@/components/applications/ApplicationShow";
 
-type PageProps = { params: { id: string } };
+type Params = { id: string };
 
-export default async function ApplicationDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  const numId = Number(id);
+export default async function ApplicationDetailPage({
+  params,
+}: {
+  params: Promise<Params> | Params;
+}) {
+  const p = params instanceof Promise ? await params : params;
+  const numId = Number(p.id);
   if (Number.isNaN(numId)) notFound();
 
   const qc = getQueryClient();
@@ -26,5 +30,3 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     </HydrationBoundary>
   );
 }
-
-//
