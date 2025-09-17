@@ -1,0 +1,229 @@
+"use client";
+
+import * as React from "react";
+import type { ApplicationRead } from "@/client";
+import { ResolutionBadge } from "@/components/applications/ResolutionBadge";
+import { StatusBadge } from "@/components/applications/StatusBadge";
+import TableDateCell from "@/components/table/TableDateCell";
+import { displayUrl } from "@/lib/utils/text-helpers";
+import { PIPELINE_STATUS_LABELS, JOB_LOCATION_LABELS } from "@/lib/utils/enums";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import ApplicationHeroForm from "@/components/applications/ApplicationHero/ApplicationHeroForm";
+
+const currency = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+function salarySummary(a: ApplicationRead) {
+  const { salary_min: min, salary_max: max, salary_target: tgt } = a;
+  if (tgt != null) return currency.format(tgt);
+  if (min != null && max != null)
+    return `${currency.format(min)}–${currency.format(max)}`;
+  if (min != null) return `≥ ${currency.format(min)}`;
+  if (max != null) return `≤ ${currency.format(max)}`;
+  return "—";
+}
+
+export default function ApplicationHero({ app }: { app: ApplicationRead }) {
+  const [editing, setEditing] = React.useState(false);
+
+  if (editing) {
+    return (
+      <ApplicationHeroForm
+        app={app}
+        onCancel={() => setEditing(false)}
+        onSaved={() => setEditing(false)}
+      />
+    );
+  }
+
+  return (
+    <section className="rounded-lg border p-4 md:p-6 bg-white">
+      {/* Header row */}
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
+          {app.company} — <span className="font-normal">{app.role}</span>
+        </h1>
+        <button
+          className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-gray-50"
+          onClick={() => setEditing(true)}
+        >
+          Edit
+        </button>
+      </div>
+
+      {/* Quick facts row */}
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        {app.pipeline_status && <StatusBadge value={app.pipeline_status} />}
+        <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium border bg-slate-50 text-slate-700 border-slate-200">
+          {JOB_LOCATION_LABELS[app.job_location]}
+        </span>
+        <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium border bg-slate-50 text-slate-700 border-slate-200">
+          {salarySummary(app)}
+        </span>
+        {app.resolution_status && (
+          <ResolutionBadge value={app.resolution_status} />
+        )}
+      </div>
+
+      {/* Meta line */}
+      <div className="mt-2 text-sm text-gray-700 flex flex-wrap items-center gap-3">
+        {app.url && (
+          <Link
+            href={app.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2"
+            title={app.url}
+          >
+            {displayUrl(app.url)}
+          </Link>
+        )}
+        <span className="text-gray-300">•</span>
+        <span title="">
+          Next follow-up:{" "}
+          <TableDateCell
+            iso={app.next_follow_up_date ?? null}
+            showTime={false}
+          />
+        </span>
+      </div>
+
+      {/* Two-column detail */}
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Field label="Company" value={app.company} />
+          <Field label="Role" value={app.role} />
+          <Field
+            label="URL"
+            value={
+              app.url ? (
+                <a
+                  href={app.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                  title={app.url}
+                >
+                  {displayUrl(app.url)}
+                </a>
+              ) : (
+                "—"
+              )
+            }
+          />
+          <Field
+            label="Recruiting Agency"
+            value={app.recruiting_agency ?? "—"}
+          />
+          <Field
+            label="Date Applied"
+            value={<TableDateCell iso={app.date_applied} showTime={false} />}
+            title={app.date_applied}
+          />
+          <Field
+            label="Next Follow Up"
+            value={
+              <TableDateCell
+                iso={app.next_follow_up_date ?? null}
+                showTime={false}
+              />
+            }
+          />
+          <Field
+            label="Notes"
+            value={
+              app.notes ? (
+                <span className="whitespace-pre-wrap">{app.notes}</span>
+              ) : (
+                "—"
+              )
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Field
+            label="Pipeline Status"
+            value={
+              app.pipeline_status
+                ? PIPELINE_STATUS_LABELS[app.pipeline_status]
+                : "—"
+            }
+          />
+          <Field
+            label="Job Location"
+            value={JOB_LOCATION_LABELS[app.job_location]}
+          />
+          <Field
+            label="Resolution"
+            value={
+              app.resolution_status ? (
+                <ResolutionBadge value={app.resolution_status} />
+              ) : (
+                "—"
+              )
+            }
+          />
+          <Field
+            label="Salary Min"
+            value={
+              app.salary_min != null ? currency.format(app.salary_min) : "—"
+            }
+          />
+          <Field
+            label="Salary Max"
+            value={
+              app.salary_max != null ? currency.format(app.salary_max) : "—"
+            }
+          />
+          <Field
+            label="Salary Target"
+            value={
+              app.salary_target != null
+                ? currency.format(app.salary_target)
+                : "—"
+            }
+          />
+          <Field
+            label="Resolution Date"
+            value={
+              <TableDateCell
+                iso={app.resolution_date ?? null}
+                showTime={false}
+              />
+            }
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  value,
+  title,
+  className,
+}: {
+  label: string;
+  value: React.ReactNode;
+  title?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn("grid grid-cols-[10rem_1fr] items-start gap-3", className)}
+    >
+      <div className="text-xs uppercase tracking-wide text-gray-500">
+        {label}
+      </div>
+      <div title={title} className="text-gray-900">
+        {value}
+      </div>
+    </div>
+  );
+}
