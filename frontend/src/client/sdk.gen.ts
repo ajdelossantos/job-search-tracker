@@ -226,8 +226,14 @@ export const updateApplicationApiV1ApplicationsApplicationIdPatch = <
 };
 
 /**
- * Read Contacts
  * Read all contacts.
+ * Read all contacts with optional filtering by name, company, or linked application ID.
+ *
+ * Example:
+ * ```
+ * GET /api/v1/contacts?name=John&company=Acme&application_id=42&limit=20&offset=0
+ * ```
+ * Query params: `name`, `company`, `application_id`, `limit`, `offset`.
  */
 export const readContactsApiV1ContactsGet = <
   ThrowOnError extends boolean = false,
@@ -245,8 +251,8 @@ export const readContactsApiV1ContactsGet = <
 };
 
 /**
- * Create Contact
  * Create a new contact.
+ * Create a new contact, optionally linking to existing applications.
  */
 export const createContactApiV1ContactsPost = <
   ThrowOnError extends boolean = false,
@@ -268,8 +274,8 @@ export const createContactApiV1ContactsPost = <
 };
 
 /**
- * Delete Contact
  * Delete a contact by ID.
+ * Delete a contact by its ID.
  */
 export const deleteContactApiV1ContactsContactIdDelete = <
   ThrowOnError extends boolean = false,
@@ -287,8 +293,8 @@ export const deleteContactApiV1ContactsContactIdDelete = <
 };
 
 /**
- * Read Contact
  * Read a contact by ID.
+ * Read a contact by its unique ID.
  */
 export const readContactApiV1ContactsContactIdGet = <
   ThrowOnError extends boolean = false,
@@ -306,8 +312,8 @@ export const readContactApiV1ContactsContactIdGet = <
 };
 
 /**
- * Update Contact
  * Update a contact by ID.
+ * Update a contact by its ID. You can also manage linked applications using `application_ids_add` and `application_ids_remove` fields to add or remove links.
  */
 export const updateContactApiV1ContactsContactIdPatch = <
   ThrowOnError extends boolean = false,
