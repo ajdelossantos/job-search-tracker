@@ -2,8 +2,17 @@
 
 from datetime import datetime
 from typing import Optional, List, Any
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, HttpUrl, computed_field
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    EmailStr,
+    HttpUrl,
+    computed_field,
+    field_serializer,
+)
 from pydantic_extra_types.phone_numbers import PhoneNumber
+from app.core.timeutils import to_z
 
 
 class ContactBase(BaseModel):
@@ -49,6 +58,24 @@ class ContactUpdate(ContactBase):
     application_ids_add: Optional[List[int]] = None
     application_ids_remove: Optional[List[int]] = None
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "name": "Jordan Quux",
+                "company": "Acme",
+                "email": "jordan@acme.com",
+                "title": "Recruiter",
+                "url": "https://linkedin.com/in/jordan",
+                "role": "Recruiter",
+                "phone": "+15125551234",
+                "notes": "Follow up in a week",
+                "application_ids_add": [3],
+                "application_ids_remove": [1],
+            }
+        },
+    )
+
 
 class ContactRead(ContactBase):
     """Represents a contact entity with its associated attributes."""
@@ -57,6 +84,9 @@ class ContactRead(ContactBase):
         from_attributes=True,
         json_schema_extra={
             "example": {
+                "id": 1,
+                "created_at": "2023-10-01T12:34:56Z",
+                "updated_at": "2023-10-02T12:34:56Z",
                 "name": "Jordan Quux",
                 "company": "Acme",
                 "email": "jordan@acme.com",
@@ -81,3 +111,11 @@ class ContactRead(ContactBase):
     def application_ids(self) -> List[int]:
         """Serializes applications ids."""
         return [a.id for a in (self.applications or [])]
+
+    @field_serializer("created_at", when_used="json")
+    def _s_created(self, v: datetime, _info):
+        return to_z(v)
+
+    @field_serializer("updated_at", when_used="json")
+    def _s_updated(self, v: Optional[datetime], _info):
+        return to_z(v)

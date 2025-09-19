@@ -2,14 +2,17 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
-from ..core.enums import InterviewType
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
+from app.core.enums import InterviewType
+from app.core.timeutils import parse_required_aware_to_utc, to_z
 
 
 class InterviewBase(BaseModel):
     """Base model for interview schema."""
 
-    scheduled_date: datetime = Field(..., description="Timezone-aware datetime")
+    scheduled_date: datetime = Field(
+        ..., description="Timezone-aware datetime(ISO 8601, e.g. 2025-09-05T19:00:00Z)"
+    )
     type: InterviewType
     notes: Optional[str] = None
 
@@ -23,6 +26,7 @@ class InterviewCreateFlat(InterviewBase):
                 "scheduled_date": "2025-09-05T19:00:00Z",
                 "type": InterviewType.RECRUITER.value,
                 "notes": "Recruiter call",
+                "application_id": 42,
             }
         }
     )
@@ -44,6 +48,11 @@ class InterviewCreate(InterviewBase):
         }
     )
 
+    @model_validator(mode="after")
+    def _normalize_scheduled_date(self):
+        self.scheduled_date = parse_required_aware_to_utc(self.scheduled_date)
+        return self
+
 
 class InterviewUpdate(BaseModel):
     """Schema for updating a new Interview"""
@@ -52,6 +61,23 @@ class InterviewUpdate(BaseModel):
     type: Optional[InterviewType] = None
     notes: Optional[str] = None
     application_id: Optional[int] = None  # allow reassign (optional)
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "scheduled_date": "2025-09-05T19:00:00Z",
+                "type": InterviewType.RECRUITER.value,
+                "notes": "Recruiter call",
+                "application_id": 42,
+            }
+        }
+    )
+
+    @model_validator(mode="after")
+    def _normalize_scheduled_date(self):
+        if self.scheduled_date is not None:
+            self.scheduled_date = parse_required_aware_to_utc(self.scheduled_date)
+        return self
 
 
 class InterviewRead(InterviewBase):
@@ -76,3 +102,15 @@ class InterviewRead(InterviewBase):
     application_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+    @field_serializer("scheduled_date", when_used="json")
+    def _s_sched(self, v: datetime, _info):
+        return to_z(v)
+
+    @field_serializer("created_at", when_used="json")
+    def _s_created(self, v: datetime, _info):
+        return to_z(v)
+
+    @field_serializer("updated_at", when_used="json")
+    def _s_updated(self, v: Optional[datetime], _info):
+        return to_z(v)

@@ -2,8 +2,9 @@
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
-from ..core.enums import PipelineStatus
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from app.core.enums import PipelineStatus
+from app.core.timeutils import to_z
 
 
 class PipelineHistoryBase(BaseModel):
@@ -103,3 +104,7 @@ class PipelineHistoryRead(PipelineHistoryBase):
     id: int
     application_id: int
     changed_at: datetime
+
+    @field_serializer("changed_at", when_used="json")
+    def _s_changed(self, v: datetime, _info):
+        return to_z(v)
