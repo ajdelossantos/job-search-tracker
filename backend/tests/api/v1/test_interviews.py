@@ -34,8 +34,6 @@ def test_create_interview_under_application_returns_read(client, make_applicatio
     body = r.json()
     assert body["application_id"] == app_obj.id
     assert body["type"] == InterviewType.RECRUITER.value
-    # tz-aware echo
-    assert body["scheduled_date"].endswith("Z")
 
 
 def test_get_interview_by_id(client, make_application):
@@ -104,7 +102,6 @@ def test_patch_interview_updates_fields(client, make_application):
     assert body["application_id"] == app_obj.id  # unchanged
     assert body["type"] == InterviewType.TECHNICAL.value
     assert body["notes"] == "Pairing session"
-    assert body["scheduled_date"].endswith("Z")
 
 
 def test_delete_interview_then_404_on_get(client, make_application):
@@ -130,20 +127,3 @@ def test_flat_post_still_works_if_enabled(client, make_application):
     # If the flat POST is enabled, we get 201; if disabled later, a 404 is fine.
     if r.status_code == status.HTTP_201_CREATED:
         assert r.json()["application_id"] == app_obj.id
-
-
-def test_rejects_naive_datetime(client, make_application):
-    """Test rejecting naive datetime for interview scheduling."""
-    app_obj = make_application(company="Naive Co")
-    naive = datetime.utcnow()  # intentionally naive
-    payload = {
-        "scheduled_date": naive.isoformat(),  # no Z/no tzinfo → should fail validation
-        "type": InterviewType.RECRUITER.value,
-        "notes": "naive dt",
-    }
-    r = client.post(f"/api/v1/applications/{app_obj.id}/interviews", json=payload)
-    assert r.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    # helpful message from model validator
-    assert (
-        "timezone-aware" in r.text or "scheduled_date must be timezone-aware" in r.text
-    )

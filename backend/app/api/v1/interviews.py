@@ -14,7 +14,6 @@ from app.schemas.interviews import (
     InterviewUpdate,
     InterviewCreateFlat,
 )
-from app.services.interviews_service import ensure_aware_utc
 
 router = APIRouter(prefix="/api/v1", tags=["Interviews"])
 
@@ -69,7 +68,7 @@ async def list_interviews_for_application(
 
     application_interviews = query.all()
 
-    return [ensure_aware_utc(i) for i in application_interviews]
+    return application_interviews
 
 
 @router.post(
@@ -112,7 +111,7 @@ async def create_interview_for_application(
 
     response.headers["Location"] = f"/api/v1/interviews/{new_interview.id}"
 
-    return ensure_aware_utc(new_interview)
+    return new_interview
 
 
 # ---------- Flat: /interviews (kept for convenience) ----------
@@ -148,7 +147,7 @@ async def list_interviews(
         .all()
     )
 
-    return [ensure_aware_utc(i) for i in interviews]
+    return interviews
 
 
 @router.get(
@@ -165,7 +164,7 @@ async def read_interview(db: db_dependency, interview_id: int = Path(gt=0)):
     if interview is None:
         raise HTTPException(status_code=404, detail="Interview not found")
 
-    return ensure_aware_utc(interview)
+    return interview
 
 
 # Optional: keep a flat POST that accepts application_id in body
@@ -207,7 +206,7 @@ async def create_interview_flat(
     db.refresh(new_interview)
 
     response.headers["Location"] = f"/api/v1/interviews/{new_interview.id}"
-    return ensure_aware_utc(new_interview)
+    return new_interview
 
 
 @router.patch(
@@ -242,7 +241,7 @@ async def update_interview(
     db.commit()
     db.refresh(interview)
 
-    return ensure_aware_utc(interview)
+    return interview
 
 
 @router.delete(
