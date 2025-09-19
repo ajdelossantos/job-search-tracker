@@ -51,7 +51,7 @@ class ContactCreate(ContactBase):
 
 
 class ContactUpdate(ContactBase):
-    """Schema for updating an existing contact."""
+    """Schema for updating an existing contact. Phone accepts E.164 and RFC 3966 formats."""
 
     name: Optional[str] = Field(None, min_length=3)
     company: Optional[str] = Field(None, min_length=3)
@@ -78,7 +78,7 @@ class ContactUpdate(ContactBase):
 
 
 class ContactRead(ContactBase):
-    """Represents a contact entity with its associated attributes."""
+    """Represents a contact entity with its associated attributes. Phone will always return RFC 3966 format."""
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -93,7 +93,7 @@ class ContactRead(ContactBase):
                 "title": "Recruiter",
                 "url": "https://linkedin.com/in/jordan",
                 "role": "Recruiter",
-                "phone": "+15125551234",
+                "phone": "tel:+1-512-555-1234",
                 "notes": "Follow up in a week",
             }
         },
