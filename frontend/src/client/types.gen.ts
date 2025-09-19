@@ -231,7 +231,7 @@ export type ContactCreate = {
 
 /**
  * ContactRead
- * Represents a contact entity with its associated attributes.
+ * Represents a contact entity with its associated attributes. Phone will always return RFC 3966 format.
  */
 export type ContactRead = {
   /**
@@ -287,7 +287,7 @@ export type ContactRead = {
 
 /**
  * ContactUpdate
- * Schema for updating an existing contact.
+ * Schema for updating an existing contact. Phone accepts E.164 and RFC 3966 formats.
  */
 export type ContactUpdate = {
   /**
@@ -590,7 +590,7 @@ export type ValidationError = {
 
 /**
  * ContactRead
- * Represents a contact entity with its associated attributes.
+ * Represents a contact entity with its associated attributes. Phone will always return RFC 3966 format.
  */
 export type ContactReadWritable = {
   /**
