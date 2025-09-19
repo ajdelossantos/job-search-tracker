@@ -5,7 +5,11 @@ import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import type { ApplicationRead, ApplicationUpdate } from "@/client";
-import { patchApplication } from "@/lib/api/applications";
+import {
+  getApplicationByIdOptions,
+  getApplicationsOptions,
+  patchApplication,
+} from "@/lib/api/applications";
 import {
   PIPELINE_STATUS_LABELS,
   JOB_LOCATION_LABELS,
@@ -27,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
 
 export default function ApplicationHeroForm({
   app,
@@ -41,13 +46,23 @@ export default function ApplicationHeroForm({
   const initial = React.useMemo(() => toInitialValues(app), [app]);
 
   const mutation = useMutation({
+    mutationKey: ["applications", "patch", app.id] as const,
     mutationFn: async (body: Partial<ApplicationUpdate>) =>
       patchApplication(app.id, body),
-    onSuccess: async () => {
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ["applications", app.id] }),
-        qc.invalidateQueries({ queryKey: ["applications"] }),
-      ]);
+    onSuccess: async (updated) => {
+      const byIdKey = getApplicationByIdOptions({
+        path: { application_id: app.id },
+      }).queryKey;
+
+      const listKey = getApplicationsOptions().queryKey;
+
+      // 1) Write-through for instant UI
+      // (replace if your patch returns the full ApplicationRead)
+      qc.setQueryData<ApplicationRead>(byIdKey, updated);
+
+      // 2) Invalidate lists (all pages/filters)
+      await qc.invalidateQueries({ queryKey: listKey, exact: false });
+
       onSaved();
     },
     onError: () => {
@@ -63,16 +78,14 @@ export default function ApplicationHeroForm({
         form.setFieldMeta("salary_max", (m) => ({ ...m, errors: [cross] }));
         return;
       }
-      const diff = buildUpdateDiff(app, value);
-      if (Object.keys(diff).length === 0) {
-        onCancel(); // nothing changed
+      const submitDiff = buildUpdateDiff(app, value);
+      if (Object.keys(submitDiff).length === 0) {
+        onCancel();
         return;
       }
-      mutation.mutate(diff);
+      mutation.mutate(submitDiff);
     },
   });
-
-  const disabled = mutation.isPending;
 
   const statusOptions = enumOptions(PIPELINE_STATUS_LABELS);
   const locationOptions = enumOptions(JOB_LOCATION_LABELS);
@@ -80,41 +93,52 @@ export default function ApplicationHeroForm({
 
   return (
     <section className="rounded-lg border p-4 md:p-6 bg-white">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
-          {form.state.values.company || "New Application"} —{" "}
-          <span className="font-normal">
-            {form.state.values.role || "Role"}
-          </span>
-        </h1>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
-            onClick={() => {
-              form.reset();
-              onCancel();
-            }}
-            disabled={disabled}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "inline-flex items-center rounded-md border px-3 py-1.5 text-sm font-medium",
-              form.state.canSubmit && form.state.isDirty && !disabled
-                ? "bg-black text-white"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed",
-            )}
-            onClick={() => form.handleSubmit()}
-            disabled={!form.state.canSubmit || !form.state.isDirty || disabled}
-          >
-            {disabled ? "Saving…" : "Save"}
-          </button>
-        </div>
-      </div>
+      {/* Header (reactive) */}
+      <form.Subscribe selector={(s) => s.values}>
+        {(values) => {
+          const diff = buildUpdateDiff(app, values);
+          const hasDiff = Object.keys(diff).length > 0;
+          const saving = mutation.isPending;
+          const canClickSave = hasDiff && !saving;
+
+          return (
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
+                {form.state.values.company || "New Application"} —{" "}
+                <span className="font-normal">
+                  {form.state.values.role || "Role"}
+                </span>
+              </h1>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
+                  onClick={() => {
+                    form.reset();
+                    onCancel();
+                  }}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center rounded-md border px-3 py-1.5 text-sm font-medium",
+                    canClickSave
+                      ? "bg-black text-white"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed",
+                  )}
+                  onClick={() => form.handleSubmit()}
+                  disabled={!canClickSave}
+                >
+                  {saving ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          );
+        }}
+      </form.Subscribe>
 
       {/* Two-column form */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -208,11 +232,12 @@ export default function ApplicationHeroForm({
           <Field name="next_follow_up_date" label="Next Follow Up">
             <form.Field
               name="next_follow_up_date"
-              validators={{ onChange: validators.date }}
+              validators={{ onChange: validators.dateOrDateTime }}
               children={(f) => (
                 <div>
                   <Input
                     type="datetime-local"
+                    step="60"
                     value={f.state.value}
                     onChange={(e) => f.handleChange(e.target.value)}
                     onBlur={f.handleBlur}
@@ -222,6 +247,7 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
+          <DeviceTzHint />
 
           <Field name="notes" label="Notes">
             <form.Field
@@ -264,14 +290,21 @@ export default function ApplicationHeroForm({
             />
           </Field>
 
-          <div className="grid grid-cols-3 gap-3">
-            <Field name="salary_min" label="Salary Min">
+          {/* Salary group */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <Field
+              name="salary_min"
+              label="Salary Min"
+              // label above input (stacked)
+              className="grid-cols-1"
+            >
               <form.Field
                 name="salary_min"
                 validators={{ onChange: validators.integer }}
                 children={(f) => (
                   <div>
                     <Input
+                      className="w-full text-right"
                       inputMode="numeric"
                       value={f.state.value}
                       onChange={(e) => f.handleChange(e.target.value)}
@@ -283,13 +316,14 @@ export default function ApplicationHeroForm({
               />
             </Field>
 
-            <Field name="salary_max" label="Salary Max">
+            <Field name="salary_max" label="Salary Max" className="grid-cols-1">
               <form.Field
                 name="salary_max"
                 validators={{ onChange: validators.integer }}
                 children={(f) => (
                   <div>
                     <Input
+                      className="w-full text-right"
                       inputMode="numeric"
                       value={f.state.value}
                       onChange={(e) => f.handleChange(e.target.value)}
@@ -301,13 +335,14 @@ export default function ApplicationHeroForm({
               />
             </Field>
 
-            <Field name="salary_target" label="Target">
+            <Field name="salary_target" label="Target" className="grid-cols-1">
               <form.Field
                 name="salary_target"
                 validators={{ onChange: validators.integer }}
                 children={(f) => (
                   <div>
                     <Input
+                      className="w-full text-right"
                       inputMode="numeric"
                       value={f.state.value}
                       onChange={(e) => f.handleChange(e.target.value)}
@@ -348,9 +383,15 @@ function Field(props: {
   label: string;
   required?: boolean;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="grid grid-cols-[10rem_1fr] items-center gap-3">
+    <div
+      className={cn(
+        "grid items-center gap-3",
+        props.className ?? "grid-cols-[10rem_minmax(0,1fr)]",
+      )}
+    >
       <label
         className="text-xs uppercase tracking-wide text-gray-500"
         htmlFor={props.name}
@@ -368,24 +409,24 @@ function Error({ msg }: { msg?: string }) {
   return <p className="mt-1 text-xs text-red-600">{msg}</p>;
 }
 
+
 function EnumSelect<
-  N extends "pipeline_status" | "job_location" | "resolution_status",
+  N extends 'pipeline_status' | 'job_location' | 'resolution_status',
 >({
   form,
   name,
   options,
 }: {
-  form: ReturnType<typeof useForm<any>>;
-  name: N;
-  options: { value: string; label: string }[];
+  form: ReturnType<typeof useForm> 
+  name: N
+  options: { value: string; label: string }[]
 }) {
   return (
     <form.Field
       name={name}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      children={(f: any) => (
+      children={(f) => (
         <Select
-          value={f.state.value || undefined}
+          value={f.state.value ? String(f.state.value) : undefined}
           onValueChange={(v) => f.handleChange(v)}
         >
           <SelectTrigger>
@@ -401,5 +442,5 @@ function EnumSelect<
         </Select>
       )}
     />
-  );
+  )
 }

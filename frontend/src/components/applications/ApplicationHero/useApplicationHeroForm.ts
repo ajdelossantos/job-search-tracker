@@ -88,16 +88,20 @@ const toNullOrString = (s: string) => {
   return t === "" ? null : t;
 };
 
-/* "", date-only, datetime-local, or ISO -> null | ISO (UTC) | date-only */
-function toNullIsoOrDate(v: string): string | null {
+// "", date-only, datetime-local, or ISO -> null | ISO (UTC, timezone-aware)
+function toNullIso(v: string): string | null {
   const t = v.trim();
   if (!t) return null;
-  if (isDateOnly(t)) return t; // keep date-only
-  if (isLocalDateTime(t)) {
-    const d = new Date(t); // interprets as local
-    return Number.isNaN(d.getTime()) ? null : d.toISOString();
-  }
   try {
+    if (isDateOnly(t)) {
+      // Interpret a bare date as local midnight, then emit ISO with Z
+      return new Date(`${t}T00:00`).toISOString();
+    }
+    if (isLocalDateTime(t)) {
+      // Treat the local datetime as local time, emit ISO with Z
+      return new Date(t).toISOString();
+    }
+    // Already ISO (Z/offset) or something parseable
     const d = new Date(t);
     return Number.isNaN(d.getTime()) ? null : d.toISOString();
   } catch {
@@ -176,9 +180,11 @@ export function buildUpdateDiff(
   if (!cmp(vApplied, dateOnly(original.date_applied)))
     put("date_applied", vApplied);
 
-  const vFollow = toNullIsoOrDate(values.next_follow_up_date);
-  if (!cmp(vFollow, original.next_follow_up_date ?? null))
-    put("next_follow_up_date", vFollow);
+  const vFollow = toNullIso(values.next_follow_up_date);
+  const origFollow = original.next_follow_up_date
+    ? toNullIso(original.next_follow_up_date)
+    : null;
+  if (!cmp(vFollow, origFollow)) put("next_follow_up_date", vFollow);
 
   const vRes = values.resolution_date.trim();
   const vResNorm = vRes === "" ? null : vRes;
