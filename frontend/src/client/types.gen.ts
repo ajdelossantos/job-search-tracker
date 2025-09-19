@@ -40,9 +40,9 @@ export type ApplicationCreate = {
   job_location: JobLocation;
   pipeline_status?: PipelineStatus;
   /**
-   * Next Follow Up Date
+   * Next Follow Up At
    */
-  next_follow_up_date?: string | null;
+  next_follow_up_at?: string | null;
   resolution_status?: ResolutionStatus;
   /**
    * Resolution Date
@@ -94,9 +94,9 @@ export type ApplicationRead = {
   job_location: JobLocation;
   pipeline_status?: PipelineStatus;
   /**
-   * Next Follow Up Date
+   * Next Follow Up At
    */
-  next_follow_up_date?: string | null;
+  next_follow_up_at?: string | null;
   resolution_status?: ResolutionStatus;
   /**
    * Resolution Date
@@ -172,9 +172,9 @@ export type ApplicationUpdate = {
   job_location?: JobLocation | null;
   pipeline_status?: PipelineStatus | null;
   /**
-   * Next Follow Up Date
+   * Next Follow Up At
    */
-  next_follow_up_date?: string | null;
+  next_follow_up_at?: string | null;
   resolution_status?: ResolutionStatus | null;
   /**
    * Resolution Date
@@ -349,7 +349,7 @@ export type HttpValidationError = {
 export type InterviewCreate = {
   /**
    * Scheduled Date
-   * Timezone-aware datetime
+   * Timezone-aware datetime(ISO 8601, e.g. 2025-09-05T19:00:00Z)
    */
   scheduled_date: string;
   type: InterviewType;
@@ -366,7 +366,7 @@ export type InterviewCreate = {
 export type InterviewCreateFlat = {
   /**
    * Scheduled Date
-   * Timezone-aware datetime
+   * Timezone-aware datetime(ISO 8601, e.g. 2025-09-05T19:00:00Z)
    */
   scheduled_date: string;
   type: InterviewType;
@@ -387,7 +387,7 @@ export type InterviewCreateFlat = {
 export type InterviewRead = {
   /**
    * Scheduled Date
-   * Timezone-aware datetime
+   * Timezone-aware datetime(ISO 8601, e.g. 2025-09-05T19:00:00Z)
    */
   scheduled_date: string;
   type: InterviewType;
@@ -681,10 +681,14 @@ export type ReadApplicationsApiV1ApplicationsGetError =
 
 export type ReadApplicationsApiV1ApplicationsGetResponses = {
   /**
+   * Response Read Applications Api V1 Applications  Get
    * Successful Response
    */
-  200: unknown;
+  200: Array<ApplicationRead>;
 };
+
+export type ReadApplicationsApiV1ApplicationsGetResponse =
+  ReadApplicationsApiV1ApplicationsGetResponses[keyof ReadApplicationsApiV1ApplicationsGetResponses];
 
 export type CreateApplicationApiV1ApplicationsPostData = {
   body: ApplicationCreate;
