@@ -2,11 +2,20 @@
 
 from datetime import date, datetime
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict, HttpUrl, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    HttpUrl,
+    Field,
+    field_serializer,
+    model_validator,
+    field_validator,
+)
 from app.core.enums import InterviewType, JobLocation, PipelineStatus, ResolutionStatus
 from app.schemas.contacts import ContactRead
 from app.schemas.interviews import InterviewRead
 from app.schemas.pipeline_history import PipelineHistoryRead
+from app.core.timeutils import parse_required_aware_to_utc, to_z
 
 
 class ApplicationBase(BaseModel):
@@ -24,7 +33,7 @@ class ApplicationBase(BaseModel):
 
     job_location: JobLocation
     pipeline_status: PipelineStatus = PipelineStatus.WILL_APPLY
-    next_follow_up_date: Optional[date] = None
+    next_follow_up_at: Optional[datetime] = None
     resolution_status: ResolutionStatus = ResolutionStatus.ONGOING
     resolution_date: Optional[date] = None
     notes: Optional[str] = None
@@ -56,12 +65,19 @@ class ApplicationCreate(ApplicationBase):
                 "salary_target": 150000,
                 "job_location": JobLocation.REMOTE.value,
                 "pipeline_status": PipelineStatus.WILL_APPLY.value,
-                "next_follow_up_date": "2025-09-08",
+                "next_follow_up_at": "2025-09-08T16:00:00Z",
                 "resolution_status": ResolutionStatus.ONGOING.value,
                 "notes": "Saw role via referral; prep phone screen.",
             }
         }
     )
+
+    @field_validator("next_follow_up_at", mode="before")
+    @classmethod
+    def _vf_create_followup(cls, v):
+        if v is None:
+            return None
+        return parse_required_aware_to_utc(v)
 
 
 class ApplicationUpdate(ApplicationBase):
@@ -79,21 +95,36 @@ class ApplicationUpdate(ApplicationBase):
 
     job_location: Optional[JobLocation] = None
     pipeline_status: Optional[PipelineStatus] = None
-    next_follow_up_date: Optional[date] = None
+    next_follow_up_at: Optional[datetime] = None
     resolution_status: Optional[ResolutionStatus] = None
     resolution_date: Optional[date] = None
     notes: Optional[str] = None
 
-    @model_validator(mode="after")
-    def validate_salary_bounds(self):
-        """Validates that salary_max is greater than or equal to salary_min."""
-        if (
-            self.salary_min is not None
-            and self.salary_max is not None
-            and self.salary_max < self.salary_min
-        ):
-            raise ValueError("salary_max must be >= salary_min")
-        return self
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "date_applied": "2025-09-01",
+                "company": "Home Depot",
+                "role": "Senior Fullstack Engineer",
+                "url": "https://example.com/jobs/123",
+                "salary_min": 135000,
+                "salary_max": 150000,
+                "salary_target": 150000,
+                "job_location": JobLocation.REMOTE.value,
+                "pipeline_status": PipelineStatus.STAGE_1.value,
+                "next_follow_up_at": "2025-09-08T16:00:00Z",
+                "resolution_status": ResolutionStatus.ON_HOLD.value,
+                "notes": "Banger of a theme song.",
+            }
+        }
+    )
+
+    @field_validator("next_follow_up_at", mode="before")
+    @classmethod
+    def _vf_update_followup(cls, v):
+        if v is None:
+            return None
+        return parse_required_aware_to_utc(v)
 
 
 class ApplicationRead(ApplicationBase):
@@ -113,7 +144,7 @@ class ApplicationRead(ApplicationBase):
                 "salary_target": 180000,
                 "job_location": JobLocation.REMOTE.value,
                 "pipeline_status": PipelineStatus.APPLIED.value,
-                "next_follow_up_date": "2025-09-08",
+                "next_follow_up_at": "2025-09-08T16:00:00Z",
                 "resolution_status": ResolutionStatus.ONGOING.value,
                 "created_at": "2025-09-02T15:04:05Z",
                 "updated_at": "2025-09-02T16:00:00Z",
@@ -160,3 +191,15 @@ class ApplicationRead(ApplicationBase):
     interviews: List[InterviewRead] = Field(default_factory=list)
     contacts: List[ContactRead] = Field(default_factory=list)
     pipeline_histories: List[PipelineHistoryRead] = Field(default_factory=list)
+
+    @field_serializer("created_at", when_used="json")
+    def _s_created(self, v: datetime, _info):
+        return to_z(v)
+
+    @field_serializer("updated_at", when_used="json")
+    def _s_updated(self, v: Optional[datetime], _info):
+        return to_z(v)
+
+    @field_serializer("next_follow_up_at", when_used="json")
+    def _s_followup(self, v: Optional[datetime], _info):
+        return to_z(v)

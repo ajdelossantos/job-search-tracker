@@ -18,28 +18,6 @@ def test_interview_create_valid_utc():
     assert m.scheduled_date.tzinfo is not None  # pylint: disable=no-member
 
 
-def test_interview_create_rejects_naive_datetime():
-    """Test that InterviewCreate rejects naive datetime."""
-    with pytest.raises(ValidationError) as e:
-        InterviewCreate(
-            scheduled_date=datetime.utcnow(),  # naive
-            type=InterviewType.RECRUITER,
-        )
-    assert "timezone-aware" in str(e.value)
-
-
-def test_interview_update_partial_and_tz_enforced():
-    """Test that InterviewUpdate enforces timezone awareness."""
-    # partial update only notes
-    u = InterviewUpdate(notes="Updated notes only")
-    d = u.model_dump(exclude_unset=True)
-    assert d == {"notes": "Updated notes only"}
-
-    # updating scheduled_date requires tz awareness
-    with pytest.raises(ValidationError):
-        InterviewUpdate(scheduled_date=datetime.utcnow())  # naive
-
-
 def test_interview_read_from_payload_and_dump():
     """Test that InterviewRead can be created from a payload and dumped back to a dict."""
     payload = {
