@@ -88,7 +88,7 @@ class Applications(Base):
 
     job_location = Column(SqlEnum(JobLocation))
     pipeline_status = Column(SqlEnum(PipelineStatus), nullable=False, index=True)
-    next_follow_up_date = Column(Date)
+    next_follow_up_at = Column(DateTime(timezone=True), index=True)
     resolution_status = Column(SqlEnum(ResolutionStatus), index=True)
     resolution_date = Column(Date)
     notes = Column(Text)

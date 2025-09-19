@@ -2,8 +2,17 @@
 
 from datetime import datetime
 from typing import Optional, List, Any
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, HttpUrl, computed_field
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    EmailStr,
+    HttpUrl,
+    computed_field,
+    field_serializer,
+)
 from pydantic_extra_types.phone_numbers import PhoneNumber
+from app.core.timeutils import to_z
 
 
 class ContactBase(BaseModel):
@@ -42,16 +51,12 @@ class ContactCreate(ContactBase):
 
 
 class ContactUpdate(ContactBase):
-    """Schema for updating an existing contact."""
+    """Schema for updating an existing contact. Phone accepts E.164 and RFC 3966 formats."""
 
     name: Optional[str] = Field(None, min_length=3)
     company: Optional[str] = Field(None, min_length=3)
     application_ids_add: Optional[List[int]] = None
     application_ids_remove: Optional[List[int]] = None
-
-
-class ContactRead(ContactBase):
-    """Represents a contact entity with its associated attributes."""
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -64,6 +69,31 @@ class ContactRead(ContactBase):
                 "url": "https://linkedin.com/in/jordan",
                 "role": "Recruiter",
                 "phone": "+15125551234",
+                "notes": "Follow up in a week",
+                "application_ids_add": [3],
+                "application_ids_remove": [1],
+            }
+        },
+    )
+
+
+class ContactRead(ContactBase):
+    """Represents a contact entity with its associated attributes. Phone will always return RFC 3966 format."""
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id": 1,
+                "created_at": "2023-10-01T12:34:56Z",
+                "updated_at": "2023-10-02T12:34:56Z",
+                "name": "Jordan Quux",
+                "company": "Acme",
+                "email": "jordan@acme.com",
+                "title": "Recruiter",
+                "url": "https://linkedin.com/in/jordan",
+                "role": "Recruiter",
+                "phone": "tel:+1-512-555-1234",
                 "notes": "Follow up in a week",
             }
         },
@@ -81,3 +111,11 @@ class ContactRead(ContactBase):
     def application_ids(self) -> List[int]:
         """Serializes applications ids."""
         return [a.id for a in (self.applications or [])]
+
+    @field_serializer("created_at", when_used="json")
+    def _s_created(self, v: datetime, _info):
+        return to_z(v)
+
+    @field_serializer("updated_at", when_used="json")
+    def _s_updated(self, v: Optional[datetime], _info):
+        return to_z(v)

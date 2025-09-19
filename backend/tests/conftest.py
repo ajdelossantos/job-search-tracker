@@ -101,7 +101,7 @@ def make_application(db_session):
             salary_target=overrides.pop("salary_target", None),
             job_location=overrides.pop("job_location", JobLocation.REMOTE),
             pipeline_status=overrides.pop("pipeline_status", PipelineStatus.APPLIED),
-            next_follow_up_date=overrides.pop("next_follow_up_date", None),
+            next_follow_up_at=overrides.pop("next_follow_up_at", None),
             resolution_status=overrides.pop(
                 "resolution_status", ResolutionStatus.ONGOING
             ),

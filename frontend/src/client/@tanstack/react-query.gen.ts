@@ -38,6 +38,7 @@ import type {
   HealthCheckHealthCheckGetData,
   ReadApplicationsApiV1ApplicationsGetData,
   ReadApplicationsApiV1ApplicationsGetError,
+  ReadApplicationsApiV1ApplicationsGetResponse,
   CreateApplicationApiV1ApplicationsPostData,
   CreateApplicationApiV1ApplicationsPostError,
   CreateApplicationApiV1ApplicationsPostResponse,
@@ -242,9 +243,9 @@ export const readApplicationsApiV1ApplicationsGetInfiniteOptions = (
   options?: Options<ReadApplicationsApiV1ApplicationsGetData>,
 ) => {
   return infiniteQueryOptions<
-    unknown,
+    ReadApplicationsApiV1ApplicationsGetResponse,
     ReadApplicationsApiV1ApplicationsGetError,
-    InfiniteData<unknown>,
+    InfiniteData<ReadApplicationsApiV1ApplicationsGetResponse>,
     QueryKey<Options<ReadApplicationsApiV1ApplicationsGetData>>,
     | number
     | Pick<

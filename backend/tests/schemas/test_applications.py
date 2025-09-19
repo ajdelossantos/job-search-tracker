@@ -23,7 +23,7 @@ def test_application_create_valid():
         salary_target=150000,
         job_location=JobLocation.REMOTE,  # enum instance works
         pipeline_status=PipelineStatus.WILL_APPLY,  # enum instance works
-        next_follow_up_date=date(2025, 9, 8),
+        next_follow_up_at="2025-09-08T16:00:00Z",
         resolution_status=ResolutionStatus.ONGOING,
         notes="ok",
     )
