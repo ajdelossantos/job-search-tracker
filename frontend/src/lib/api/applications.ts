@@ -13,6 +13,7 @@ export type {
   ApplicationUpdate,
   PipelineStatus,
 } from "@/client/index";
+import { requestData } from "@/lib/api/http";
 
 /**
  * Updates an existing job application with the provided data.
@@ -22,11 +23,11 @@ export type {
  * @returns A promise that resolves to the updated application data
  * @throws Will throw an error if the request fails or the application is not found
  */
-export async function patchApplication(
+export function patchApplication(
   id: number,
   body: Partial<ApplicationUpdate>,
-) {
-  return client.request<ApplicationRead>({
+): Promise<ApplicationRead> {
+  return requestData<ApplicationRead, Partial<ApplicationUpdate>>({
     method: "PATCH",
     url: `/api/v1/applications/${id}`,
     body: body satisfies ApplicationUpdate,
