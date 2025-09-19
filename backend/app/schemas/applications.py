@@ -24,7 +24,7 @@ class ApplicationBase(BaseModel):
 
     job_location: JobLocation
     pipeline_status: PipelineStatus = PipelineStatus.WILL_APPLY
-    next_follow_up_date: Optional[date] = None
+    next_follow_up_at: Optional[datetime] = None
     resolution_status: ResolutionStatus = ResolutionStatus.ONGOING
     resolution_date: Optional[date] = None
     notes: Optional[str] = None
@@ -56,7 +56,7 @@ class ApplicationCreate(ApplicationBase):
                 "salary_target": 150000,
                 "job_location": JobLocation.REMOTE.value,
                 "pipeline_status": PipelineStatus.WILL_APPLY.value,
-                "next_follow_up_date": "2025-09-08",
+                "next_follow_up_at": "2025-09-08T16:00:00Z",
                 "resolution_status": ResolutionStatus.ONGOING.value,
                 "notes": "Saw role via referral; prep phone screen.",
             }
@@ -79,7 +79,7 @@ class ApplicationUpdate(ApplicationBase):
 
     job_location: Optional[JobLocation] = None
     pipeline_status: Optional[PipelineStatus] = None
-    next_follow_up_date: Optional[date] = None
+    next_follow_up_at: Optional[datetime] = None
     resolution_status: Optional[ResolutionStatus] = None
     resolution_date: Optional[date] = None
     notes: Optional[str] = None
@@ -113,7 +113,7 @@ class ApplicationRead(ApplicationBase):
                 "salary_target": 180000,
                 "job_location": JobLocation.REMOTE.value,
                 "pipeline_status": PipelineStatus.APPLIED.value,
-                "next_follow_up_date": "2025-09-08",
+                "next_follow_up_at": "2025-09-08T16:00:00Z",
                 "resolution_status": ResolutionStatus.ONGOING.value,
                 "created_at": "2025-09-02T15:04:05Z",
                 "updated_at": "2025-09-02T16:00:00Z",
