@@ -10,6 +10,7 @@ import { PIPELINE_STATUS_LABELS, JOB_LOCATION_LABELS } from "@/lib/utils/enums";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import ApplicationHeroForm from "@/components/applications/ApplicationHero/ApplicationHeroForm";
+import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
 
 const currency = new Intl.NumberFormat(undefined, {
   style: "currency",
@@ -129,10 +130,11 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
             value={
               <TableDateCell
                 iso={app.next_follow_up_date ?? null}
-                showTime={false}
+                showTime={true}
               />
             }
           />
+          <DeviceTzHint />
           <Field
             label="Notes"
             value={
