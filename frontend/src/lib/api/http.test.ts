@@ -75,6 +75,7 @@ describe("requestData", () => {
   });
 
   it("throws error when response is null", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockClient.request.mockResolvedValue(null as any);
 
     await expect(

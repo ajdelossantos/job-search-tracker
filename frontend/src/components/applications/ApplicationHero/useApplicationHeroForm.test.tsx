@@ -1,4 +1,3 @@
-// src/components/applications/ApplicationHero/useApplicationHeroForm.test.ts
 import { describe, it, expect } from "vitest";
 import { toInitialValues, buildUpdateDiff } from "./useApplicationHeroForm";
 import type { ApplicationRead } from "@/client";
@@ -49,6 +48,7 @@ describe("buildUpdateDiff", () => {
       next_follow_up_at: null,
     });
     // should not include unchanged fields
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((diff as any).role).toBeUndefined();
   });
 
