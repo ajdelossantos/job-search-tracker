@@ -17,7 +17,7 @@ export type FormValues = {
   resolution_status: ApplicationRead["resolution_status"] | "";
 
   date_applied: string; // YYYY-MM-DD (required)
-  next_follow_up_date: string; // "" | YYYY-MM-DD | YYYY-MM-DDTHH:mm (local)
+  next_follow_up_at: string; // "" | YYYY-MM-DD | YYYY-MM-DDTHH:mm (local)
   resolution_date: string; // "" | YYYY-MM-DD
 };
 
@@ -69,8 +69,8 @@ export function toInitialValues(a: ApplicationRead): FormValues {
     resolution_status: a.resolution_status ?? "",
 
     date_applied: dateOnly(a.date_applied),
-    next_follow_up_date: a.next_follow_up_date
-      ? toLocalDateTimeInput(a.next_follow_up_date)
+    next_follow_up_at: a.next_follow_up_at
+      ? toLocalDateTimeInput(a.next_follow_up_at)
       : "",
     resolution_date: dateOnly(a.resolution_date ?? ""),
   };
@@ -180,11 +180,11 @@ export function buildUpdateDiff(
   if (!cmp(vApplied, dateOnly(original.date_applied)))
     put("date_applied", vApplied);
 
-  const vFollow = toNullIso(values.next_follow_up_date);
-  const origFollow = original.next_follow_up_date
-    ? toNullIso(original.next_follow_up_date)
+  const vFollow = toNullIso(values.next_follow_up_at);
+  const origFollow = original.next_follow_up_at
+    ? toNullIso(original.next_follow_up_at)
     : null;
-  if (!cmp(vFollow, origFollow)) put("next_follow_up_date", vFollow);
+  if (!cmp(vFollow, origFollow)) put("next_follow_up_at", vFollow);
 
   const vRes = values.resolution_date.trim();
   const vResNorm = vRes === "" ? null : vRes;

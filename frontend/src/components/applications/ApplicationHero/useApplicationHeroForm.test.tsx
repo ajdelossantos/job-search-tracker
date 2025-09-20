@@ -15,7 +15,7 @@ const base: ApplicationRead = {
   salary_min: 100000,
   salary_max: 150000,
   salary_target: null,
-  next_follow_up_date: "2025-09-15",
+  next_follow_up_at: "2025-09-15",
   resolution_date: null,
   recruiting_agency: null,
   notes: "Note",
@@ -41,12 +41,12 @@ describe("buildUpdateDiff", () => {
     const v = toInitialValues(base);
     v.company = "Procore Inc";
     v.salary_target = "160000";
-    v.next_follow_up_date = ""; // clear
+    v.next_follow_up_at = ""; // clear
     const diff = buildUpdateDiff(base, v);
     expect(diff).toMatchObject({
       company: "Procore Inc",
       salary_target: 160000,
-      next_follow_up_date: null,
+      next_follow_up_at: null,
     });
     // should not include unchanged fields
     expect((diff as any).role).toBeUndefined();

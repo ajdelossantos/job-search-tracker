@@ -229,9 +229,9 @@ export default function ApplicationHeroForm({
             />
           </Field>
 
-          <Field name="next_follow_up_date" label="Next Follow Up">
+          <Field name="next_follow_up_at" label="Next Follow Up">
             <form.Field
-              name="next_follow_up_date"
+              name="next_follow_up_at"
               validators={{ onChange: validators.dateOrDateTime }}
               children={(f) => (
                 <div>
@@ -409,17 +409,16 @@ function Error({ msg }: { msg?: string }) {
   return <p className="mt-1 text-xs text-red-600">{msg}</p>;
 }
 
-
 function EnumSelect<
-  N extends 'pipeline_status' | 'job_location' | 'resolution_status',
+  N extends "pipeline_status" | "job_location" | "resolution_status",
 >({
   form,
   name,
   options,
 }: {
-  form: ReturnType<typeof useForm> 
-  name: N
-  options: { value: string; label: string }[]
+  form: ReturnType<typeof useForm>;
+  name: N;
+  options: { value: string; label: string }[];
 }) {
   return (
     <form.Field
@@ -442,5 +441,5 @@ function EnumSelect<
         </Select>
       )}
     />
-  )
+  );
 }
