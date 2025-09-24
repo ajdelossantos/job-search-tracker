@@ -84,7 +84,7 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
           </Link>
         )}
         <span className="text-gray-300">•</span>
-        <span title="">
+        <span>
           Next follow-up:{" "}
           <TableDateCell iso={app.next_follow_up_at ?? null} showTime={false} />
         </span>
