@@ -60,9 +60,18 @@ export const PIPELINE_STATUS_LABELS = {
 
 export const pipelineStatusOptions = enumOptions(PIPELINE_STATUS_LABELS);
 
+/**
+ * Returns the human-readable label for a given pipeline status key.
+ * Expects a valid {@link PipelineStatus} string such as "applied".
+ */
 export const labelOfPipelineStatus = (s: PipelineStatus) =>
   PIPELINE_STATUS_LABELS[s];
 
+/**
+ * Type guard that verifies the provided value is a {@link PipelineStatus} key.
+ * Accepts any unknown input and returns `true` only for strings in
+ * {@link PIPELINE_STATUS_LABELS}.
+ */
 export function isPipelineStatus(x: unknown): x is PipelineStatus {
   return typeof x === "string" && x in PIPELINE_STATUS_LABELS;
 }
