@@ -17,7 +17,7 @@ export type FormValues = {
   resolution_status: ApplicationRead["resolution_status"] | "";
 
   date_applied: string; // YYYY-MM-DD (required)
-  next_follow_up_at: string; // "" | YYYY-MM-DD | YYYY-MM-DDTHH:mm (local)
+  next_follow_up_at: string; // "" | YYYY-MM-DDTHH:mm (local)
   resolution_date: string; // "" | YYYY-MM-DD
 };
 
@@ -25,21 +25,6 @@ export type FormValues = {
 const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
 const isLocalDateTime = (s: string) =>
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s);
-
-/* ISO -> datetime-local string in local TZ (YYYY-MM-DDTHH:mm) */
-function toLocalDateTimeInput(iso?: string | null): string {
-  if (!iso) return "";
-  if (isDateOnly(iso)) return `${iso}T00:00`;
-  try {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "";
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  } catch {
-    return "";
-  }
-}
-
 const dateOnly = (iso?: string | null) => (!iso ? "" : iso.slice(0, 10));
 
 /**
@@ -69,9 +54,7 @@ export function toInitialValues(a: ApplicationRead): FormValues {
     resolution_status: a.resolution_status ?? "",
 
     date_applied: dateOnly(a.date_applied),
-    next_follow_up_at: a.next_follow_up_at
-      ? toLocalDateTimeInput(a.next_follow_up_at)
-      : "",
+    next_follow_up_at: a.next_follow_up_at ?? "",
     resolution_date: dateOnly(a.resolution_date ?? ""),
   };
 }

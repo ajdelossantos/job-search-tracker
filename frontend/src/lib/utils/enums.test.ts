@@ -8,10 +8,12 @@ import {
 
 describe("pipeline status helpers", () => {
   it("pipelineStatusOptions matches PIPELINE_STATUS_LABELS", () => {
-    const expected = Object.entries(PIPELINE_STATUS_LABELS).map(([value, label]) => ({
-      value,
-      label,
-    }));
+    const expected = Object.entries(PIPELINE_STATUS_LABELS).map(
+      ([value, label]) => ({
+        value,
+        label,
+      }),
+    );
 
     expect(pipelineStatusOptions).toEqual(expected);
   });
