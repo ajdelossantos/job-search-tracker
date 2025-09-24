@@ -24,7 +24,7 @@ export const COLUMN_IDS = [
   "salary_range",
   "url",
   "recruiting_agency",
-  "next_follow_up_date",
+  "next_follow_up_at",
   "resolution_status",
   "resolution_date",
   "date_applied",
@@ -168,10 +168,10 @@ function buildRegistry(
       ),
     },
 
-    next_follow_up_date: {
-      id: "next_follow_up_date",
+    next_follow_up_at: {
+      id: "next_follow_up_at",
       header: "Follow Up",
-      accessorKey: "next_follow_up_date",
+      accessorKey: "next_follow_up_at",
       cell: ({ getValue }) => (
         <TableDateCell
           iso={getValue<string | null | undefined>()}
@@ -296,7 +296,7 @@ export const FULL_ORDER: readonly ApplicationColumnId[] = [
   "salary_range",
   "url",
   "recruiting_agency",
-  "next_follow_up_date",
+  "next_follow_up_at",
   "resolution_status",
   "resolution_date",
   "date_applied",
@@ -315,7 +315,7 @@ export const COMPACT_ORDER: readonly ApplicationColumnId[] = [
   "job_location",
   "salary_range",
   "date_applied",
-  "next_follow_up_date",
+  "next_follow_up_at",
   "interviews_count",
   "contacts_count",
   "notes",
