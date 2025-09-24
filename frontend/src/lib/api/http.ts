@@ -11,7 +11,7 @@ import { client } from "@/client/client.gen";
  * @param args.url - The URL endpoint to send the request to
  * @param args.body - Optional request body data
  *
- * @returns A promise that resolves to the typed response data
+ * @returns A promise that resolves to the typed response data, typically objects or arrays
  *
  * @throws {Error} When the response is empty, null, or not an object
  *
