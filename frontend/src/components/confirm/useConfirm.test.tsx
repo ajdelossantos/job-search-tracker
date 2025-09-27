@@ -1,6 +1,6 @@
 import * as React from "react";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   AlertDialog,
@@ -46,10 +46,14 @@ describe("AlertDialog", () => {
 
     await user.click(screen.getByText("Delete"));
     // Dialog content appears (ported to body)
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("Delete contact?")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /confirm/i }));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
+    const dialog = await screen.findByRole("alertdialog");
+    expect(within(dialog).getByText(/delete contact\?/i)).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: /confirm/i }));
+    // Confirm triggers close; assert callback fired
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
+    // And the dialog disappears
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
   });
 });
