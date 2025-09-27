@@ -1,14 +1,19 @@
+// src/components/applications/ApplicationHero/ApplicationHeroForm.tsx
+
 /* eslint-disable react/no-children-prop */
 "use client";
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
-import type { ApplicationRead, ApplicationUpdate } from "@/client";
+import type {
+  ApplicationRead,
+  ApplicationUpdate,
+} from "@/lib/api/applications";
 import {
   getApplicationByIdOptions,
   getApplicationsOptions,
-  patchApplication,
+  updateApplicationMutation, // ⬅️ use generated mutation
 } from "@/lib/api/applications";
 import {
   PIPELINE_STATUS_LABELS,
@@ -46,9 +51,9 @@ export default function ApplicationHeroForm({
   const initial = React.useMemo(() => toInitialValues(app), [app]);
 
   const mutation = useMutation({
+    // Use the generated mutationFn; keep our own key + callbacks
+    ...updateApplicationMutation(),
     mutationKey: ["applications", "patch", app.id] as const,
-    mutationFn: async (body: Partial<ApplicationUpdate>) =>
-      patchApplication(app.id, body),
     onSuccess: async (updated) => {
       const byIdKey = getApplicationByIdOptions({
         path: { application_id: app.id },
@@ -56,11 +61,10 @@ export default function ApplicationHeroForm({
 
       const listKey = getApplicationsOptions().queryKey;
 
-      // 1) Write-through for instant UI
-      // (replace if your patch returns the full ApplicationRead)
+      // 1) Write-through for instant UI (server is source of truth)
       qc.setQueryData<ApplicationRead>(byIdKey, updated);
 
-      // 2) Invalidate lists (all pages/filters)
+      // 2) Keep list views fresh
       await qc.invalidateQueries({ queryKey: listKey, exact: false });
 
       onSaved();
@@ -78,12 +82,17 @@ export default function ApplicationHeroForm({
         form.setFieldMeta("salary_max", (m) => ({ ...m, errors: [cross] }));
         return;
       }
-      const submitDiff = buildUpdateDiff(app, value);
+      const submitDiff = buildUpdateDiff(app, value) as ApplicationUpdate;
       if (Object.keys(submitDiff).length === 0) {
         onCancel();
         return;
       }
-      mutation.mutate(submitDiff);
+
+      // ⬇️ Generated mutation expects { path, body }
+      mutation.mutate({
+        path: { application_id: app.id },
+        body: submitDiff,
+      });
     },
   });
 
@@ -268,7 +277,7 @@ export default function ApplicationHeroForm({
         <div className="space-y-3">
           <Field name="pipeline_status" label="Pipeline Status">
             <EnumSelect
-              form={form}
+              form={form as ReturnType<typeof useForm>}
               name="pipeline_status"
               options={statusOptions}
             />
@@ -276,7 +285,7 @@ export default function ApplicationHeroForm({
 
           <Field name="job_location" label="Job Location">
             <EnumSelect
-              form={form}
+              form={form as ReturnType<typeof useForm>}
               name="job_location"
               options={locationOptions}
             />
@@ -284,7 +293,7 @@ export default function ApplicationHeroForm({
 
           <Field name="resolution_status" label="Resolution Status">
             <EnumSelect
-              form={form}
+              form={form as ReturnType<typeof useForm>}
               name="resolution_status"
               options={resolutionOptions}
             />
@@ -292,12 +301,7 @@ export default function ApplicationHeroForm({
 
           {/* Salary group */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <Field
-              name="salary_min"
-              label="Salary Min"
-              // label above input (stacked)
-              className="grid-cols-1"
-            >
+            <Field name="salary_min" label="Salary Min" className="grid-cols-1">
               <form.Field
                 name="salary_min"
                 validators={{ onChange: validators.integer }}
