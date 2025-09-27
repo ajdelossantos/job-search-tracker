@@ -7,7 +7,7 @@ import {
   replaceSlice,
   optimistic,
   readSlice,
-} from "./applicationSlice";
+} from "./application-slice";
 import { PipelineHistoryRead } from "@/client";
 
 function makeQC() {
