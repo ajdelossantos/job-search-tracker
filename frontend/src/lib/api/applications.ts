@@ -13,4 +13,4 @@ export type {
   ApplicationRead,
   ApplicationUpdate,
   PipelineStatus,
-} from "@/client/index";
+} from "@/client";
