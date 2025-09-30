@@ -14,7 +14,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/tailwind-utils";
 
 /**
  * A reusable data table component built with React Table (TanStack Table).

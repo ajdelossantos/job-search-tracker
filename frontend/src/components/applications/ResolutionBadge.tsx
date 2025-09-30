@@ -5,7 +5,7 @@ import {
   type ResolutionStatus,
 } from "@/lib/utils/enums";
 import { toneForResolutionStatus } from "@/lib/utils/status-badge-helpers";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/tailwind-utils";
 
 /**
  * A badge component that displays the resolution status of a job application.

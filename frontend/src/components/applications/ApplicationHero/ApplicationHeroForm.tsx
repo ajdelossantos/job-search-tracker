@@ -21,7 +21,7 @@ import {
   RESOLUTION_STATUS_LABELS,
   enumOptions,
 } from "@/lib/utils/enums";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/tailwind-utils";
 import {
   toInitialValues,
   buildUpdateDiff,

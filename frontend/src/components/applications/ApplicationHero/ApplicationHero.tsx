@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/applications/StatusBadge";
 import TableDateCell from "@/components/table/TableDateCell";
 import { displayUrl } from "@/lib/utils/text-helpers";
 import { PIPELINE_STATUS_LABELS, JOB_LOCATION_LABELS } from "@/lib/utils/enums";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/tailwind-utils";
 import Link from "next/link";
 import ApplicationHeroForm from "@/components/applications/ApplicationHero/ApplicationHeroForm";
 import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
