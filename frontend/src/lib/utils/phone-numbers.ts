@@ -37,17 +37,16 @@ export function formatPhonePretty(e164?: string | null) {
  * ```typescript
  * toE164("555-123-4567")        // "+15551234567"
  * toE164("+44 20 7946 0958")    // "+442079460958"
- * toE164("0044 20 7946 0958")   // "+442079460958"
- * toE164("020 7946 0958", "44") // "+442079460958"
- * ```
- */
-export function toE164(phone: string, defaultCountry = "1") {
+ * */
+export function toE164(phone: string, defaultCountry: string = "1") {
   const digits = phone.trim().replace(/[^\d+]/g, "");
 
   if (digits.startsWith("+")) {
     return digits;
   } else if (digits.startsWith("00")) {
     return "+" + digits.slice(2);
+  } else if (digits.startsWith("0") && defaultCountry !== "1") {
+    return "+" + defaultCountry + digits.slice(1);
   } else {
     return "+" + defaultCountry + digits;
   }
