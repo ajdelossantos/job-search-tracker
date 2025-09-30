@@ -1,4 +1,3 @@
-// src/components/applications/Contacts/ContactCard.tsx
 "use client";
 
 import * as React from "react";
@@ -6,6 +5,10 @@ import type { ContactRead } from "@/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ContactForm } from "@/components/contacts/ContactForm";
+import {
+  ConfirmUnlinkButton,
+  ConfirmDeleteButton,
+} from "@/components/contacts/ConfirmActions";
 import type { ContactFormValues } from "@/lib/api/contacts";
 import { displayUrl } from "@/lib/utils/text-helpers";
 import { formatPhonePretty } from "@/lib/utils/phone-numbers";
@@ -99,22 +102,18 @@ export default function ContactCard({
             >
               Edit
             </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onUnlink}
+
+            <ConfirmUnlinkButton
               disabled={disabled}
-            >
-              Unlink
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={onDelete}
+              onConfirm={onUnlink}
+              title={`Unlink ${contact.name}?`}
+            />
+
+            <ConfirmDeleteButton
               disabled={disabled}
-            >
-              Delete
-            </Button>
+              onConfirm={onDelete}
+              title={`Delete ${contact.name}?`}
+            />
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
