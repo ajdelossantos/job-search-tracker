@@ -50,7 +50,9 @@ export default function ApplicationShow({ id }: { id: number }) {
       </div>
 
       <div role="tabpanel">
-        {tab === "contacts" && <ContactsShow appId={app.id} />}
+        {tab === "contacts" && (
+          <ContactsShow appId={app.id} contacts={app.contacts} />
+        )}
         {tab === "interviews" && (
           <div className="text-sm text-gray-500">Interviews (coming soon)</div>
         )}
