@@ -5,9 +5,10 @@ import * as React from "react";
 import type { ContactRead } from "@/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ContactForm, type ContactFormValues } from "./ContactForm";
+import { ContactForm } from "@/components/contacts/ContactForm";
+import type { ContactFormValues } from "@/lib/api/contacts";
 import { displayUrl } from "@/lib/utils/text-helpers";
-import { formatPhonePretty, toE164 } from "@/lib/utils/phone-numbers";
+import { formatPhonePretty } from "@/lib/utils/phone-numbers";
 import { emptyToNull } from "@/lib/utils/text-helpers";
 
 function buildDiff(original: ContactRead, values: ContactFormValues) {
@@ -24,8 +25,8 @@ function buildDiff(original: ContactRead, values: ContactFormValues) {
 
   const diff: Record<string, unknown> = {};
   (Object.keys(next) as (keyof typeof next)[]).forEach((k) => {
-    const was = (original as any)[k] ?? null;
-    const now = (next as any)[k] ?? null;
+    const was = original[k as keyof ContactRead] ?? null;
+    const now = next[k] ?? null;
     if (was !== now) diff[k] = now;
   });
   return diff;

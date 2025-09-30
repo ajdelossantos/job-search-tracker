@@ -9,12 +9,10 @@ import {
   useUpdateContact,
   useUnlinkContact,
   useDeleteContact,
+  type ContactFormValues,
 } from "@/lib/api/contacts";
 import ContactCard from "@/components/contacts/ContactCard";
-import {
-  ContactForm,
-  type ContactFormValues,
-} from "@/components/contacts/ContactForm";
+import { ContactForm } from "@/components/contacts/ContactForm";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
