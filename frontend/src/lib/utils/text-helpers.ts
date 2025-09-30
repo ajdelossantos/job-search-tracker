@@ -95,3 +95,22 @@ export function displayUrl(
 
   return `${host}/${first}${showEllipsisForMore && hasMore ? "…" : ""}`;
 }
+
+/**
+ * Converts an empty or whitespace-only string to null.
+ *
+ * @param v - The input string to process. Can be undefined.
+ * @returns The trimmed string if it contains non-whitespace characters, otherwise null.
+ *
+ * @example
+ * ```typescript
+ * emptyToNull("  hello  ") // returns "hello"
+ * emptyToNull("   ") // returns null
+ * emptyToNull("") // returns null
+ * emptyToNull(undefined) // returns null
+ * ```
+ */
+export function emptyToNull(v?: string) {
+  const s = (v ?? "").trim();
+  return s.length ? s : null;
+}
