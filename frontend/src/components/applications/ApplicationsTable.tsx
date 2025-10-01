@@ -8,6 +8,8 @@ import {
 } from "@/lib/api/applications";
 import { DataTable } from "@/components/table/DataTable";
 import { getApplicationColumnsCompact } from "@/components/table/columns";
+import ApplicationCreateDialog from "./ApplicationCreateDialog";
+import { Button } from "../ui/button";
 
 type MaybeWrappedArray<T> = T[] | { data: T[] };
 function hasDataArray<T>(x: unknown): x is { data: T[] } {
@@ -44,6 +46,11 @@ export default function ApplicationsTable({
         {query.isFetching ? (
           <span className="text-sm opacity-60">Refreshing…</span>
         ) : null}
+        <ApplicationCreateDialog>
+          <Button variant="outline" size="sm">
+            Create
+          </Button>
+        </ApplicationCreateDialog>
       </div>
 
       <DataTable<ApplicationRead>
