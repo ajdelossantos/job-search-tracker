@@ -96,6 +96,7 @@ export default function ApplicationHeroForm({
       });
       onSaved(created);
     },
+    onError: () => alert("Failed to create application"),
   });
 
   // ---- form

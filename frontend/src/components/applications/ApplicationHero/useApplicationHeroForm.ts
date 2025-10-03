@@ -107,13 +107,14 @@ function toIsoOrEmpty(v: string): string {
 }
 
 // remove undefined props so JSON.stringify doesn’t include them
-const pruneUndefined = <T extends Record<string, unknown>>(obj: T) => {
+const pruneUndefined = <T extends Record<string, unknown>>(obj: T): T => {
   const out: Partial<T> = {};
-  for (const [k, v] of Object.entries(obj)) {
-    // TODO: better typing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (v !== undefined) (out as any)[k] = v;
-  }
+  (Object.keys(obj) as Array<keyof T>).forEach((k) => {
+    const v = obj[k];
+    if (v !== undefined) {
+      out[k] = v;
+    }
+  });
   return out as T;
 };
 
