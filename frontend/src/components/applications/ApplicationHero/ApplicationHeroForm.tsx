@@ -166,7 +166,7 @@ export default function ApplicationHeroForm({
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
                 {values.company ||
-                  (mode === "create" ? "New Application" : "—")}{" "}
+                  (mode === "create" ? "New Application" : "—")}
                 — <span className="font-normal">{values.role || "Role"}</span>
               </h1>
               <div className="flex gap-2">
@@ -220,43 +220,43 @@ export default function ApplicationHeroForm({
             />
           </Field>
           <Field name="role" label="Role" required>
-            {" "}
+            
             <form.Field
               name="role"
               validators={{ onBlur: validators.required() }}
               children={(f) => (
                 <div>
-                  {" "}
+                  
                   <Input
                     value={f.state.value}
                     onChange={(e) => f.handleChange(e.target.value)}
                     onBlur={f.handleBlur}
-                  />{" "}
-                  <Error msg={f.state.meta.errors[0]} />{" "}
+                  />
+                  <Error msg={f.state.meta.errors[0]} />
                 </div>
               )}
-            />{" "}
-          </Field>{" "}
+            />
+          </Field>
           <Field name="url" label="URL">
-            {" "}
+            
             <form.Field
               name="url"
               validators={{ onBlur: validators.url }}
               children={(f) => (
                 <div>
-                  {" "}
+                  
                   <Input
                     value={f.state.value}
                     onChange={(e) => f.handleChange(e.target.value)}
                     onBlur={f.handleBlur}
-                  />{" "}
-                  <Error msg={f.state.meta.errors[0]} />{" "}
+                  />
+                  <Error msg={f.state.meta.errors[0]} />
                 </div>
               )}
-            />{" "}
-          </Field>{" "}
+            />
+          </Field>
           <Field name="recruiting_agency" label="Recruiting Agency">
-            {" "}
+            
             <form.Field
               name="recruiting_agency"
               children={(f) => (
@@ -266,7 +266,7 @@ export default function ApplicationHeroForm({
                   onBlur={f.handleBlur}
                 />
               )}
-            />{" "}
+            />
           </Field>
           <Field name="date_applied" label="Date Applied" required>
             <form.Field
