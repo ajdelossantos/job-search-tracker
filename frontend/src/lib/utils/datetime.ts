@@ -104,3 +104,76 @@ export function formatDateFull(iso?: string | null, timeZone?: string): string {
     return `${text}${timeZone ? ` (${timeZone})` : ""}`;
   }
 }
+
+/**
+ * Checks if a string matches the date-only format (YYYY-MM-DD).
+ *
+ * @param s - The string to test against the date-only pattern
+ * @returns True if the string matches the YYYY-MM-DD format, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isDateOnly("2023-12-25"); // returns true
+ * isDateOnly("2023-12-25T10:30:00"); // returns false
+ * isDateOnly("12/25/2023"); // returns false
+ * ```
+ */
+export const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+
+/**
+ * Checks if a string matches the local datetime format (YYYY-MM-DDTHH:MM).
+ *
+ * @param s - The string to validate against the local datetime pattern
+ * @returns True if the string matches the format YYYY-MM-DDTHH:MM, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isLocalDateTime("2023-12-25T14:30") // returns true
+ * isLocalDateTime("2023-12-25T14:30:00") // returns false
+ * isLocalDateTime("invalid") // returns false
+ * ```
+ */
+export const isLocalDateTime = (s: string) =>
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s);
+
+/**
+ * Extracts the date portion from an ISO date string.
+ *
+ * @param iso - The ISO date string to extract the date from. Can be null or undefined.
+ * @returns The date portion in YYYY-MM-DD format, or an empty string if input is null/undefined.
+ *
+ * @example
+ * ```typescript
+ * dateOnly("2023-12-25T10:30:00Z") // Returns "2023-12-25"
+ * dateOnly(null) // Returns ""
+ * dateOnly(undefined) // Returns ""
+ * ```
+ */
+export const dateOnly = (iso?: string | null) => (!iso ? "" : iso.slice(0, 10));
+
+/**
+ * Converts an ISO date string to a local datetime string in YYYY-MM-DDTHH:MM format.
+ *
+ * @param iso - The ISO date string to convert, or null/undefined
+ * @returns A formatted local datetime string, or empty string if input is invalid
+ *
+ * @example
+ * ```typescript
+ * toLocalDatetime("2023-12-25T10:30:00Z") // "2023-12-25T10:30"
+ * toLocalDatetime(null) // ""
+ * toLocalDatetime("invalid") // ""
+ * ```
+ */
+export const toLocalDatetime = (iso?: string | null) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${d.getFullYear()}-` +
+    `${pad(d.getMonth() + 1)}-` +
+    `${pad(d.getDate())}T` +
+    `${pad(d.getHours())}:` +
+    `${pad(d.getMinutes())}`
+  );
+};

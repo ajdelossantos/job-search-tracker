@@ -3,6 +3,12 @@ import type {
   ApplicationRead,
   ApplicationUpdate,
 } from "@/lib/api/applications";
+import {
+  dateOnly,
+  isDateOnly,
+  isLocalDateTime,
+  toLocalDatetime,
+} from "@/lib/utils/datetime";
 import type {
   PipelineStatus,
   JobLocation,
@@ -28,27 +34,6 @@ export type FormValues = {
   date_applied: string; // YYYY-MM-DD (required)
   next_follow_up_at: string; // "" | YYYY-MM-DDTHH:mm (local)
   resolution_date: string; // "" | YYYY-MM-DD
-};
-
-/* ===== helpers: date parsing/formatting ===== */
-const isDateOnly = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
-const isLocalDateTime = (s: string) =>
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s);
-const dateOnly = (iso?: string | null) => (!iso ? "" : iso.slice(0, 10));
-
-/** ISO -> local "YYYY-MM-DDTHH:MM" for <input type="datetime-local"> */
-const toLocalDatetime = (iso?: string | null) => {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return (
-    `${d.getFullYear()}-` +
-    `${pad(d.getMonth() + 1)}-` +
-    `${pad(d.getDate())}T` +
-    `${pad(d.getHours())}:` +
-    `${pad(d.getMinutes())}`
-  );
 };
 
 /**

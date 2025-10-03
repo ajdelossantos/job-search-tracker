@@ -1,3 +1,5 @@
+import { isDateOnly, isLocalDateTime } from "@/lib/utils/datetime";
+
 // A validator returns a string (error) or undefined (ok)
 export type Validator<T = unknown> = (ctx: { value: T }) => string | undefined;
 
@@ -42,9 +44,6 @@ export const url: Validator<string | null | undefined> = ({ value }) => {
   }
 };
 
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const DT_LOCAL_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
-
 export const integer: Validator<string | null | undefined> = ({ value }) => {
   const s = (value ?? "").trim();
   if (!s) return undefined;
@@ -54,7 +53,7 @@ export const integer: Validator<string | null | undefined> = ({ value }) => {
 export const date: Validator<string | null | undefined> = ({ value }) => {
   const s = (value ?? "").trim();
   if (!s) return undefined;
-  return DATE_RE.test(s) ? undefined : "Enter a date (YYYY-MM-DD)";
+  return isDateOnly(s) ? undefined : "Enter a date (YYYY-MM-DD)";
 };
 
 export const optionalDateTime: Validator<string | null | undefined> = ({
@@ -62,7 +61,7 @@ export const optionalDateTime: Validator<string | null | undefined> = ({
 }) => {
   const s = (value ?? "").trim();
   if (!s) return undefined;
-  return DT_LOCAL_RE.test(s) ? undefined : "Enter YYYY-MM-DDTHH:MM";
+  return isLocalDateTime(s) ? undefined : "Enter YYYY-MM-DDTHH:MM";
 };
 
 /** Cross-field helper (not a Field validator): pass raw strings */
