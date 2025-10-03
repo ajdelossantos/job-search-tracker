@@ -1,3 +1,5 @@
+import { isDateOnly, isLocalDateTime } from "@/lib/utils/datetime";
+
 // A validator returns a string (error) or undefined (ok)
 export type Validator<T = unknown> = (ctx: { value: T }) => string | undefined;
 
@@ -40,4 +42,33 @@ export const url: Validator<string | null | undefined> = ({ value }) => {
   } catch {
     return "Invalid URL";
   }
+};
+
+export const integer: Validator<string | null | undefined> = ({ value }) => {
+  const s = (value ?? "").trim();
+  if (!s) return undefined;
+  return /^\d+$/.test(s) ? undefined : "Enter a whole number";
+};
+
+export const date: Validator<string | null | undefined> = ({ value }) => {
+  const s = (value ?? "").trim();
+  if (!s) return undefined;
+  return isDateOnly(s) ? undefined : "Enter a date (YYYY-MM-DD)";
+};
+
+export const optionalDateTime: Validator<string | null | undefined> = ({
+  value,
+}) => {
+  const s = (value ?? "").trim();
+  if (!s) return undefined;
+  return isLocalDateTime(s) ? undefined : "Enter YYYY-MM-DDTHH:MM";
+};
+
+/** Cross-field helper (not a Field validator): pass raw strings */
+export const salaryBounds = (min: string, max: string) => {
+  if (!min.trim() || !max.trim()) return undefined;
+  const a = Number(min.replaceAll(",", ""));
+  const b = Number(max.replaceAll(",", ""));
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
+  return a <= b ? undefined : "Min must be ≤ Max";
 };

@@ -14,7 +14,7 @@ import ApplicationHeroForm from "@/components/applications/ApplicationHero/Appli
 
 export default function ApplicationCreateDialog({
   children,
-  contentClassName = "sm:max-w-3xl",
+  contentClassName = "sm:max-w-4xl",
 }: {
   children: React.ReactNode;
   contentClassName?: string;

@@ -24,8 +24,7 @@ import { cn } from "@/lib/utils/tailwind-utils";
 import {
   toInitialValues,
   buildUpdateDiff,
-  validators,
-} from "./useApplicationHeroForm";
+} from "@/components/applications/ApplicationHero/useApplicationHeroForm";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -36,6 +35,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
+import {
+  required,
+  url as urlValidator,
+  integer,
+  date,
+  optionalDateTime,
+  minLength,
+  salaryBounds,
+  combine,
+} from "@/lib/forms/validators";
 import { emptyToNull, toIntOrNull } from "@/lib/utils/text-helpers";
 
 type Mode = "create" | "edit";
@@ -104,7 +113,7 @@ export default function ApplicationHeroForm({
     defaultValues: initial,
     onSubmit: async ({ value }) => {
       // shared cross-field validation
-      const cross = validators.salaryBounds(value.salary_min, value.salary_max);
+      const cross = salaryBounds(value.salary_min, value.salary_max);
       if (cross) {
         form.setFieldMeta("salary_max", (m) => ({ ...m, errors: [cross] }));
         return;
@@ -207,7 +216,7 @@ export default function ApplicationHeroForm({
           <Field name="company" label="Company" required>
             <form.Field
               name="company"
-              validators={{ onBlur: validators.required() }}
+              validators={{ onBlur: combine(required, minLength(3)) }}
               children={(f) => (
                 <div>
                   <Input
@@ -223,7 +232,7 @@ export default function ApplicationHeroForm({
           <Field name="role" label="Role" required>
             <form.Field
               name="role"
-              validators={{ onBlur: validators.required() }}
+              validators={{ onBlur: combine(required, minLength(3)) }}
               children={(f) => (
                 <div>
                   <Input
@@ -239,7 +248,7 @@ export default function ApplicationHeroForm({
           <Field name="url" label="URL">
             <form.Field
               name="url"
-              validators={{ onBlur: validators.url }}
+              validators={{ onBlur: urlValidator }}
               children={(f) => (
                 <div>
                   <Input
@@ -268,8 +277,8 @@ export default function ApplicationHeroForm({
             <form.Field
               name="date_applied"
               validators={{
-                onBlur: validators.required(),
-                onChange: validators.date,
+                onBlur: required,
+                onChange: date,
               }}
               children={(f) => (
                 <div>
@@ -287,7 +296,7 @@ export default function ApplicationHeroForm({
           <Field name="next_follow_up_at" label="Next Follow Up">
             <form.Field
               name="next_follow_up_at"
-              validators={{ onChange: validators.optionalDateTime }}
+              validators={{ onChange: optionalDateTime }}
               children={(f) => (
                 <div>
                   <Input
@@ -347,7 +356,7 @@ export default function ApplicationHeroForm({
             <Field name="salary_min" label="Salary Min" className="grid-cols-1">
               <form.Field
                 name="salary_min"
-                validators={{ onChange: validators.integer }}
+                validators={{ onChange: integer }}
                 children={(f) => (
                   <div>
                     <Input
@@ -366,7 +375,7 @@ export default function ApplicationHeroForm({
             <Field name="salary_max" label="Salary Max" className="grid-cols-1">
               <form.Field
                 name="salary_max"
-                validators={{ onChange: validators.integer }}
+                validators={{ onChange: integer }}
                 children={(f) => (
                   <div>
                     <Input
@@ -385,7 +394,7 @@ export default function ApplicationHeroForm({
             <Field name="salary_target" label="Target" className="grid-cols-1">
               <form.Field
                 name="salary_target"
-                validators={{ onChange: validators.integer }}
+                validators={{ onChange: integer }}
                 children={(f) => (
                   <div>
                     <Input
@@ -405,7 +414,7 @@ export default function ApplicationHeroForm({
           <Field name="resolution_date" label="Resolution Date">
             <form.Field
               name="resolution_date"
-              validators={{ onChange: validators.date }}
+              validators={{ onChange: date }}
               children={(f) => (
                 <div>
                   <Input
