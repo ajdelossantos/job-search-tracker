@@ -1,5 +1,3 @@
-// src/components/applications/ApplicationHero/ApplicationHeroForm.tsx
-
 /* eslint-disable react/no-children-prop */
 "use client";
 
@@ -13,7 +11,8 @@ import type {
 import {
   getApplicationByIdOptions,
   getApplicationsOptions,
-  updateApplicationMutation, // ⬅️ use generated mutation
+  updateApplicationMutation,
+  createApplicationMutation,
 } from "@/lib/api/applications";
 import {
   PIPELINE_STATUS_LABELS,
@@ -37,62 +36,114 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
+import { emptyToNull, toIntOrNull } from "@/lib/utils/text-helpers";
+
+type Mode = "create" | "edit";
 
 export default function ApplicationHeroForm({
+  mode = "edit",
   app,
   onCancel,
   onSaved,
 }: {
-  app: ApplicationRead;
+  mode?: Mode;
+  app?: ApplicationRead; // optional now; required when mode === 'edit'
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (createdOrUpdated?: ApplicationRead) => void;
 }) {
   const qc = useQueryClient();
-  const initial = React.useMemo(() => toInitialValues(app), [app]);
 
-  const mutation = useMutation({
-    // Use the generated mutationFn; keep our own key + callbacks
+  // ---- initial values
+  const initial = React.useMemo(() => {
+    if (mode === "edit") {
+      if (!app)
+        throw new globalThis.Error("ApplicationHeroForm(edit) requires `app`");
+      return toInitialValues(app);
+    }
+    // Create mode: sensible blanks
+    const today = new Date().toISOString().slice(0, 10);
+    return toInitialValues({ date_applied: today } as ApplicationRead);
+  }, [mode, app]);
+
+  // ---- mutations
+  const updateMut = useMutation({
     ...updateApplicationMutation(),
-    mutationKey: ["applications", "patch", app.id] as const,
+    mutationKey: ["applications", "patch", app?.id] as const,
     onSuccess: async (updated) => {
+      if (!app) return;
+      // 1) write-through the by-id query
       const byIdKey = getApplicationByIdOptions({
         path: { application_id: app.id },
       }).queryKey;
-
-      const listKey = getApplicationsOptions().queryKey;
-
-      // 1) Write-through for instant UI (server is source of truth)
       qc.setQueryData<ApplicationRead>(byIdKey, updated);
-
-      // 2) Keep list views fresh
-      await qc.invalidateQueries({ queryKey: listKey, exact: false });
-
-      onSaved();
+      // 2) refresh list(s)
+      await qc.invalidateQueries({
+        queryKey: getApplicationsOptions().queryKey,
+        exact: false,
+      });
+      onSaved(updated);
     },
-    onError: () => {
-      alert("Failed to save changes");
-    },
+    onError: () => alert("Failed to save changes"),
   });
 
+  const createMut = useMutation({
+    ...createApplicationMutation(),
+    onSuccess: async (created) => {
+      // refresh list(s); the server returns full ApplicationRead
+      await qc.invalidateQueries({
+        queryKey: getApplicationsOptions().queryKey,
+        exact: false,
+      });
+      onSaved(created);
+    },
+    onError: () => alert("Failed to create application"),
+  });
+
+  // ---- form
   const form = useForm({
     defaultValues: initial,
     onSubmit: async ({ value }) => {
+      // shared cross-field validation
       const cross = validators.salaryBounds(value.salary_min, value.salary_max);
       if (cross) {
         form.setFieldMeta("salary_max", (m) => ({ ...m, errors: [cross] }));
         return;
       }
-      const submitDiff = buildUpdateDiff(app, value) as ApplicationUpdate;
-      if (Object.keys(submitDiff).length === 0) {
-        onCancel();
-        return;
-      }
 
-      // ⬇️ Generated mutation expects { path, body }
-      mutation.mutate({
-        path: { application_id: app.id },
-        body: submitDiff,
-      });
+      if (mode === "edit" && app) {
+        const submitDiff = buildUpdateDiff(app, value) as ApplicationUpdate;
+        if (Object.keys(submitDiff).length === 0) {
+          onCancel();
+          return;
+        }
+        updateMut.mutate({
+          path: { application_id: app.id },
+          body: submitDiff,
+        });
+      } else {
+        const body = {
+          company: value.company.trim(),
+          role: value.role.trim(),
+          pipeline_status:
+            (value.pipeline_status as keyof typeof PIPELINE_STATUS_LABELS) ??
+            "applied",
+          date_applied: value.date_applied,
+          url: emptyToNull(value.url),
+          recruiting_agency: emptyToNull(value.recruiting_agency),
+          next_follow_up_at: emptyToNull(value.next_follow_up_at),
+          notes: emptyToNull(value.notes),
+          job_location:
+            (value.job_location as keyof typeof JOB_LOCATION_LABELS) ?? null,
+          resolution_status:
+            (value.resolution_status as keyof typeof RESOLUTION_STATUS_LABELS) ??
+            null,
+          salary_min: toIntOrNull(value.salary_min),
+          salary_max: toIntOrNull(value.salary_max),
+          salary_target: toIntOrNull(value.salary_target),
+          resolution_date: emptyToNull(value.resolution_date),
+        };
+        createMut.mutate({ body });
+      }
     },
   });
 
@@ -100,23 +151,24 @@ export default function ApplicationHeroForm({
   const locationOptions = enumOptions(JOB_LOCATION_LABELS);
   const resolutionOptions = enumOptions(RESOLUTION_STATUS_LABELS);
 
+  const saving = mode === "edit" ? updateMut.isPending : createMut.isPending;
+
   return (
     <section className="rounded-lg border p-4 md:p-6 bg-white">
       {/* Header (reactive) */}
       <form.Subscribe selector={(s) => s.values}>
         {(values) => {
-          const diff = buildUpdateDiff(app, values);
-          const hasDiff = Object.keys(diff).length > 0;
-          const saving = mutation.isPending;
-          const canClickSave = hasDiff && !saving;
+          const canClickSave =
+            mode === "create"
+              ? !saving && values.company.trim() && values.role.trim()
+              : !saving; // edit: the Save button enables when there *might* be changes; server is truthy anyway
 
           return (
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
-                {form.state.values.company || "New Application"} —{" "}
-                <span className="font-normal">
-                  {form.state.values.role || "Role"}
-                </span>
+                {values.company ||
+                  (mode === "create" ? "New Application" : "—")}
+                — <span className="font-normal">{values.role || "Role"}</span>
               </h1>
               <div className="flex gap-2">
                 <button
@@ -149,7 +201,6 @@ export default function ApplicationHeroForm({
         }}
       </form.Subscribe>
 
-      {/* Two-column form */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {/* Left column */}
         <div className="space-y-3">
@@ -169,7 +220,6 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-
           <Field name="role" label="Role" required>
             <form.Field
               name="role"
@@ -186,7 +236,6 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-
           <Field name="url" label="URL">
             <form.Field
               name="url"
@@ -203,7 +252,6 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-
           <Field name="recruiting_agency" label="Recruiting Agency">
             <form.Field
               name="recruiting_agency"
@@ -216,7 +264,6 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-
           <Field name="date_applied" label="Date Applied" required>
             <form.Field
               name="date_applied"
@@ -237,17 +284,16 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-
           <Field name="next_follow_up_at" label="Next Follow Up">
             <form.Field
               name="next_follow_up_at"
-              validators={{ onChange: validators.dateOrDateTime }}
+              validators={{ onChange: validators.optionalDateTime }}
               children={(f) => (
                 <div>
                   <Input
                     type="datetime-local"
                     step="60"
-                    value={f.state.value}
+                    value={f.state.value ?? ""}
                     onChange={(e) => f.handleChange(e.target.value)}
                     onBlur={f.handleBlur}
                   />
@@ -257,7 +303,6 @@ export default function ApplicationHeroForm({
             />
           </Field>
           <DeviceTzHint />
-
           <Field name="notes" label="Notes">
             <form.Field
               name="notes"
@@ -282,15 +327,13 @@ export default function ApplicationHeroForm({
               options={statusOptions}
             />
           </Field>
-
-          <Field name="job_location" label="Job Location">
+          <Field name="job_location" label="Job Location" required>
             <EnumSelect
               form={form as ReturnType<typeof useForm>}
               name="job_location"
               options={locationOptions}
             />
           </Field>
-
           <Field name="resolution_status" label="Resolution Status">
             <EnumSelect
               form={form as ReturnType<typeof useForm>}

@@ -114,3 +114,25 @@ export function emptyToNull(v?: string) {
   const s = (v ?? "").trim();
   return s.length ? s : null;
 }
+
+/**
+ * Converts a string value to an integer or returns null if conversion is not possible.
+ *
+ * @param v - The string value to convert. Can be undefined.
+ * @returns The parsed integer if the string represents a valid finite number, otherwise null.
+ *
+ * @example
+ * ```typescript
+ * toIntOrNull("123") // returns 123
+ * toIntOrNull("  456  ") // returns 456 (whitespace trimmed)
+ * toIntOrNull("abc") // returns null
+ * toIntOrNull("") // returns null
+ * toIntOrNull(undefined) // returns null
+ * ```
+ */
+export function toIntOrNull(v?: string) {
+  const s = (v ?? "").trim();
+  if (!s) return null;
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
