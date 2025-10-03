@@ -221,13 +221,11 @@ export default function ApplicationHeroForm({
             />
           </Field>
           <Field name="role" label="Role" required>
-            
             <form.Field
               name="role"
               validators={{ onBlur: validators.required() }}
               children={(f) => (
                 <div>
-                  
                   <Input
                     value={f.state.value}
                     onChange={(e) => f.handleChange(e.target.value)}
@@ -239,13 +237,11 @@ export default function ApplicationHeroForm({
             />
           </Field>
           <Field name="url" label="URL">
-            
             <form.Field
               name="url"
               validators={{ onBlur: validators.url }}
               children={(f) => (
                 <div>
-                  
                   <Input
                     value={f.state.value}
                     onChange={(e) => f.handleChange(e.target.value)}
@@ -257,7 +253,6 @@ export default function ApplicationHeroForm({
             />
           </Field>
           <Field name="recruiting_agency" label="Recruiting Agency">
-            
             <form.Field
               name="recruiting_agency"
               children={(f) => (
