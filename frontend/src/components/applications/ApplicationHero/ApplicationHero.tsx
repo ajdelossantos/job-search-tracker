@@ -1,16 +1,26 @@
 "use client";
 
 import * as React from "react";
-import type { ApplicationRead } from "@/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import { ResolutionBadge } from "@/components/applications/ResolutionBadge";
 import { StatusBadge } from "@/components/applications/StatusBadge";
 import TableDateCell from "@/components/table/TableDateCell";
+import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
+import { useConfirm } from "@/components/confirm/useConfirm";
+import ApplicationHeroForm from "@/components/applications/ApplicationHero/ApplicationHeroForm";
 import { displayUrl } from "@/lib/utils/text-helpers";
 import { PIPELINE_STATUS_LABELS, JOB_LOCATION_LABELS } from "@/lib/utils/enums";
 import { cn } from "@/lib/utils/tailwind-utils";
-import Link from "next/link";
-import ApplicationHeroForm from "@/components/applications/ApplicationHero/ApplicationHeroForm";
-import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
+import {
+  deleteApplicationMutation,
+  getApplicationsOptions,
+  getApplicationByIdOptions,
+  type ApplicationRead,
+} from "@/lib/api/applications";
 
 const currency = new Intl.NumberFormat(undefined, {
   style: "currency",
@@ -30,6 +40,43 @@ function salarySummary(a: ApplicationRead) {
 
 export default function ApplicationHero({ app }: { app: ApplicationRead }) {
   const [editing, setEditing] = React.useState(false);
+  const qc = useQueryClient();
+  const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirm();
+
+  const destroy = useMutation({
+    ...deleteApplicationMutation(),
+    onSuccess: async () => {
+      // Keep the list fresh
+      await qc.invalidateQueries({
+        queryKey: getApplicationsOptions().queryKey,
+        exact: false,
+      });
+      // Drop the by-id cache so nothing points at stale data
+      qc.removeQueries({
+        queryKey: getApplicationByIdOptions({
+          path: { application_id: app.id },
+        }).queryKey,
+      });
+      toast.success("Application deleted");
+      router.push("/applications");
+    },
+    onError: () => toast.error("Failed to delete application"),
+  });
+
+  const configConfirm = async () => {
+    const ok = await confirm({
+      title: "Delete application?",
+      description: "This permanently deletes the application and related data.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+
+    if (!ok) return;
+
+    destroy.mutate({ path: { application_id: app.id } });
+  };
 
   if (editing) {
     return (
@@ -48,12 +95,22 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
         <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
           {app.company} — <span className="font-normal">{app.role}</span>
         </h1>
-        <button
-          className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-gray-50"
-          onClick={() => setEditing(true)}
-        >
-          Edit
-        </button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setEditing(true)}
+            disabled={destroy.isPending}
+          >
+            Edit
+          </Button>
+          <Button
+            onClick={configConfirm}
+            disabled={destroy.isPending}
+            variant="destructive"
+          >
+            {destroy.isPending ? "Deleting…" : "Delete"}
+          </Button>
+        </div>
       </div>
 
       {/* Quick facts row */}
@@ -198,6 +255,9 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
           />
         </div>
       </div>
+
+      {/* confirm portal */}
+      <ConfirmDialog />
     </section>
   );
 }
