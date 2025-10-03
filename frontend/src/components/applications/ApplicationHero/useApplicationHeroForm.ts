@@ -1,3 +1,4 @@
+// src/components/applications/ApplicationHero/useApplicationHeroForm.ts
 import type {
   ApplicationRead,
   ApplicationUpdate,
@@ -65,6 +66,7 @@ export function toInitialValues(a: ApplicationRead): FormValues {
     salary_max: a.salary_max != null ? String(a.salary_max) : "",
     salary_target: a.salary_target != null ? String(a.salary_target) : "",
 
+    // allow empty UI state; null will be sent on submit when cleared
     pipeline_status: a.pipeline_status ?? "will_apply",
     job_location: a.job_location ?? "",
     resolution_status: a.resolution_status ?? "ongoing",
@@ -75,163 +77,109 @@ export function toInitialValues(a: ApplicationRead): FormValues {
   };
 }
 
-/* ===== coercion helpers for submit (no nulls) ===== */
+/* ===== coercion helpers for submit (nulls allowed) ===== */
 
-// numbers: blank -> undefined (omit), else Number
-const toNumberOrUndef = (s: string) => {
+// numbers: blank -> null, else Number (invalid → null)
+const toNullOrNumber = (s: string): number | null => {
   const t = s.trim();
-  if (!t) return undefined;
+  if (!t) return null;
   const n = Number(t.replaceAll(",", ""));
-  return Number.isFinite(n) ? n : undefined;
+  return Number.isFinite(n) ? n : null;
 };
 
-// strings/enums: blank -> "", else trimmed string
-const toEmptyableString = (s: string) => (s.trim() === "" ? "" : s.trim());
+// strings/enums: blank -> null, else trimmed string
+const toNullOrString = (s: string): string | null => {
+  const t = s.trim();
+  return t === "" ? null : t;
+};
 
-// "", date-only, datetime-local, or ISO -> "" or ISO(Z)
-function toIsoOrEmpty(v: string): string {
+// "", date-only, datetime-local, or ISO -> null | ISO(Z)
+function toNullIso(v: string): string | null {
   const t = v.trim();
-  if (!t) return "";
+  if (!t) return null;
   try {
-    if (isDateOnly(t)) {
-      return new Date(`${t}T00:00`).toISOString();
-    }
-    if (isLocalDateTime(t)) {
-      return new Date(t).toISOString();
-    }
+    if (isDateOnly(t)) return new Date(`${t}T00:00`).toISOString();
+    if (isLocalDateTime(t)) return new Date(t).toISOString();
     const d = new Date(t);
-    return Number.isNaN(d.getTime()) ? "" : d.toISOString();
+    return Number.isNaN(d.getTime()) ? null : d.toISOString();
   } catch {
-    return "";
+    return null;
   }
 }
 
-// remove undefined props so JSON.stringify doesn’t include them
-const pruneUndefined = <T extends Record<string, unknown>>(obj: T): T => {
-  const out: Partial<T> = {};
-  (Object.keys(obj) as Array<keyof T>).forEach((k) => {
-    const v = obj[k];
-    if (v !== undefined) {
-      out[k] = v;
-    }
-  });
-  return out as T;
-};
-
 /**
- * Builds a diff object containing only the fields that have changed between the original
- * application data and the form values.
- *
- * This function compares each field in the form values against the corresponding field
- * in the original application record and includes only the changed fields in the returned
- * update object. Different field types are handled with specific transformation logic:
- *
- * - Text fields: Converted to emptyable strings using `toEmptyableString()`
- * - Numbers: Converted using `toNumberOrUndef()` and only included if not undefined
- * - Enums: Cleared with empty string when no value is provided
- * - Dates: Handled with specific date formatting and ISO conversion
- *
- * @param original - The original application record to compare against
- * @param values - The form values containing potentially updated data
- * @returns A record containing only the fields that differ from the original,
- *          with undefined values pruned from the result
+ * Builds a diff object containing only the fields that changed.
+ * Sends `null` for intentionally cleared optional fields.
  */
 export function buildUpdateDiff(
   original: ApplicationRead,
   values: FormValues,
-): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  const put = (k: keyof ApplicationUpdate, v: unknown) => {
+): Partial<ApplicationUpdate> {
+  const out: Partial<ApplicationUpdate> = {};
+  const put = <K extends keyof ApplicationUpdate>(
+    k: K,
+    v: ApplicationUpdate[K],
+  ) => {
     out[k] = v;
   };
   const same = (a: unknown, b: unknown) =>
     JSON.stringify(a) === JSON.stringify(b);
 
-  // Text
+  // Text (company, role required → strings; others nullable)
   if (!same(values.company, original.company ?? ""))
-    put("company", toEmptyableString(values.company));
-  if (!same(values.role, original.role ?? ""))
-    put("role", toEmptyableString(values.role));
-  if (!same(values.url || "", original.url ?? ""))
-    put("url", toEmptyableString(values.url));
-  if (!same(values.recruiting_agency || "", original.recruiting_agency ?? ""))
-    put("recruiting_agency", toEmptyableString(values.recruiting_agency));
-  if (!same(values.notes || "", original.notes ?? ""))
-    put("notes", toEmptyableString(values.notes));
+    put("company", values.company.trim());
+  if (!same(values.role, original.role ?? "")) put("role", values.role.trim());
 
-  // Numbers (omit when blank)
-  const vMin = toNumberOrUndef(values.salary_min);
-  const vMax = toNumberOrUndef(values.salary_max);
-  const vTgt = toNumberOrUndef(values.salary_target);
-  if (vMin !== undefined && !same(vMin, original.salary_min))
-    put("salary_min", vMin);
-  if (vMax !== undefined && !same(vMax, original.salary_max))
-    put("salary_max", vMax);
-  if (vTgt !== undefined && !same(vTgt, original.salary_target))
-    put("salary_target", vTgt);
+  const url = toNullOrString(values.url);
+  if (!same(url, original.url ?? null)) put("url", url);
 
-  // Enums (clear with "")
-  if (!same(values.pipeline_status || "", original.pipeline_status ?? ""))
-    put("pipeline_status", values.pipeline_status || "");
-  if (!same(values.job_location || "", original.job_location ?? ""))
-    put("job_location", values.job_location || "");
-  if (!same(values.resolution_status || "", original.resolution_status ?? ""))
-    put("resolution_status", values.resolution_status || "");
+  const agency = toNullOrString(values.recruiting_agency);
+  if (!same(agency, original.recruiting_agency ?? null))
+    put("recruiting_agency", agency);
+
+  const notes = toNullOrString(values.notes);
+  if (!same(notes, original.notes ?? null)) put("notes", notes);
+
+  // Numbers (nullable)
+  const vMin = toNullOrNumber(values.salary_min);
+  if (!same(vMin, original.salary_min ?? null)) put("salary_min", vMin);
+
+  const vMax = toNullOrNumber(values.salary_max);
+  if (!same(vMax, original.salary_max ?? null)) put("salary_max", vMax);
+
+  const vTgt = toNullOrNumber(values.salary_target);
+  if (!same(vTgt, original.salary_target ?? null)) put("salary_target", vTgt);
+
+  // Enums (nullable)
+  const pStatus = (values.pipeline_status ||
+    null) as ApplicationUpdate["pipeline_status"];
+  if (!same(pStatus, original.pipeline_status ?? null))
+    put("pipeline_status", pStatus);
+
+  const jLoc = (values.job_location ||
+    null) as ApplicationUpdate["job_location"];
+  if (!same(jLoc, original.job_location ?? null)) put("job_location", jLoc);
+
+  const rStatus = (values.resolution_status ||
+    null) as ApplicationUpdate["resolution_status"];
+  if (!same(rStatus, original.resolution_status ?? null))
+    put("resolution_status", rStatus);
 
   // Dates
-  const applied = values.date_applied.trim();
+  const applied = values.date_applied.trim(); // required YYYY-MM-DD
   if (!same(applied, dateOnly(original.date_applied)))
     put("date_applied", applied);
 
-  const followIso = toIsoOrEmpty(values.next_follow_up_at); // "" or ISO
+  const followIso = toNullIso(values.next_follow_up_at); // null | ISO
   const origFollowIso = original.next_follow_up_at
-    ? toIsoOrEmpty(original.next_follow_up_at)
-    : "";
+    ? toNullIso(original.next_follow_up_at)
+    : null;
   if (!same(followIso, origFollowIso)) put("next_follow_up_at", followIso);
 
-  const res = values.resolution_date.trim(); // "" or YYYY-MM-DD
-  const origRes = original.resolution_date ?? "";
-  if (!same(res, origRes)) put("resolution_date", res || "");
+  const res = values.resolution_date.trim(); // "" | YYYY-MM-DD
+  const resNorm = res === "" ? null : res;
+  if (!same(resNorm, original.resolution_date ?? null))
+    put("resolution_date", resNorm);
 
-  return pruneUndefined(out);
+  return out;
 }
-
-/* ===== validators ===== */
-export const validators = {
-  required:
-    (label = "Required") =>
-    ({ value }: { value: string }) =>
-      value.trim() ? undefined : label,
-  url: ({ value }: { value: string }) => {
-    const t = value.trim();
-    if (!t) return undefined;
-    try {
-      new URL(t);
-      return undefined;
-    } catch {
-      return "Enter a valid URL";
-    }
-  },
-  integer: ({ value }: { value: string }) => {
-    const t = value.trim();
-    if (!t) return undefined;
-    return /^\d+$/.test(t) ? undefined : "Enter a whole number";
-  },
-  date: ({ value }: { value: string }) => {
-    const t = value.trim();
-    if (!t) return undefined;
-    return isDateOnly(t) ? undefined : "Enter a date (YYYY-MM-DD)";
-  },
-  optionalDateTime: ({ value }: { value: string }) => {
-    const t = (value ?? "").trim();
-    if (!t) return undefined;
-    return isLocalDateTime(t) ? undefined : "Enter YYYY-MM-DDTHH:MM";
-  },
-  salaryBounds: (min: string, max: string) => {
-    if (!min.trim() || !max.trim()) return undefined;
-    const a = Number(min.replaceAll(",", ""));
-    const b = Number(max.replaceAll(",", ""));
-    if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
-    return a <= b ? undefined : "Min must be ≤ Max";
-  },
-};
