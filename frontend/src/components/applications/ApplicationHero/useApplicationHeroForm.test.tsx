@@ -45,7 +45,7 @@ describe("buildUpdateDiff", () => {
     expect(diff).toMatchObject({
       company: "Procore Inc",
       salary_target: 160000,
-      next_follow_up_at: "",
+      next_follow_up_at: null,
     });
     // should not include unchanged fields
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
