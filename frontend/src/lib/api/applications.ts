@@ -63,7 +63,8 @@ const appMutationKeys = {
  */
 export function useCreateApplication() {
   const qc = useQueryClient();
-  const base = _createApplicationMutation(); // only use its mutationFn
+  // Extract mutationFn while providing our own onSuccess handler and mutationKey
+  const base = _createApplicationMutation();
   return useMutation({
     mutationFn: base.mutationFn,
     mutationKey: appMutationKeys.create,

@@ -127,7 +127,7 @@ export default function ApplicationHeroForm({
         createMut.mutate(
           { body },
           {
-            onSuccess: (created) => onSaved(created as ApplicationRead),
+            onSuccess: (created) => onSaved(created),
             onError: () => alert("Failed to create application"),
           },
         );

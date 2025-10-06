@@ -59,7 +59,7 @@ export function useCreateContact(appId?: number) {
     mutationFn: base.mutationFn,
     mutationKey: contactsMutationKeys.create,
     onSuccess: async (data: ContactRead) => {
-      // Optional write-through
+      // Write-through cache update
       if (data?.id) qc.setQueryData(contactByIdKey(data.id), data);
 
       // Invalidate scoped & global lists
