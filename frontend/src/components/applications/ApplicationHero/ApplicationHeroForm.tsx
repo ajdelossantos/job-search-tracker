@@ -98,7 +98,7 @@ export default function ApplicationHeroForm({
             body: submitDiff,
           },
           {
-            onSuccess: (updated) => onSaved(updated as ApplicationRead),
+            onSuccess: (updated) => onSaved(updated),
             onError: () => alert("Failed to save changes"),
           },
         );

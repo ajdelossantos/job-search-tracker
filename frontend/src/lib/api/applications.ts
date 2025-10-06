@@ -104,7 +104,7 @@ export function useUpdateApplication() {
   const base = _updateApplicationMutation();
   return useMutation({
     mutationFn: base.mutationFn,
-    mutationKey: appMutationKeys.update(), // static label; per-id if you pass it here
+    mutationKey: appMutationKeys.update(),
     onSuccess: async (data: ApplicationRead) => {
       if (data?.id) {
         qc.setQueryData(applicationByIdKey(data.id), data);
