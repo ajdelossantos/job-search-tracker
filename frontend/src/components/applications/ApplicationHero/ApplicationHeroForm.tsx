@@ -11,8 +11,9 @@ import {
   useCreateApplication,
   useUpdateApplication,
 } from "@/lib/api/applications";
-import { Field } from "@/components/forms/Field";
+import { EnumSelect } from "@/components/forms/EnumSelect";
 import { Error } from "@/components/forms/Error";
+import { Field } from "@/components/forms/Field";
 import {
   PIPELINE_STATUS_LABELS,
   JOB_LOCATION_LABELS,
@@ -26,13 +27,6 @@ import {
 } from "@/components/applications/ApplicationHero/useApplicationHeroForm";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { DeviceTzHint } from "@/components/timezone/DeviceTzHint";
 import {
   required,
@@ -425,40 +419,5 @@ export default function ApplicationHeroForm({
         </div>
       </div>
     </section>
-  );
-}
-
-function EnumSelect<
-  N extends "pipeline_status" | "job_location" | "resolution_status",
->({
-  form,
-  name,
-  options,
-}: {
-  form: ReturnType<typeof useForm>;
-  name: N;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <form.Field
-      name={name}
-      children={(f) => (
-        <Select
-          value={f.state.value ? String(f.state.value) : undefined}
-          onValueChange={(v) => f.handleChange(v)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select…" />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
-    />
   );
 }
