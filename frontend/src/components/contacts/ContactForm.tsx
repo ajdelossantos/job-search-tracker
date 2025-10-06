@@ -3,6 +3,8 @@
 
 import * as React from "react";
 import { useForm } from "@tanstack/react-form";
+import { Field } from "@/components/forms/Field";
+import { Error } from "@/components/forms/Error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,7 +42,7 @@ export function ContactForm({
         form.handleSubmit();
       }}
     >
-      <Field label="Name *">
+      <Field mode="edit" label="Name *" required>
         <form.Field
           name="name"
           validators={{ onBlur: combine(required, minLength(3)) }}
@@ -58,7 +60,7 @@ export function ContactForm({
         />
       </Field>
 
-      <Field label="Company *">
+      <Field mode="edit" label="Company *" required>
         <form.Field
           name="company"
           validators={{ onBlur: combine(required, minLength(2)) }}
@@ -77,7 +79,7 @@ export function ContactForm({
       </Field>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Title">
+        <Field mode="edit" label="Title">
           <form.Field
             name="title"
             children={(f) => (
@@ -90,7 +92,7 @@ export function ContactForm({
             )}
           />
         </Field>
-        <Field label="Role">
+        <Field mode="edit" label="Role">
           <form.Field
             name="role"
             children={(f) => (
@@ -106,7 +108,7 @@ export function ContactForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Email">
+        <Field mode="edit" label="Email">
           <form.Field
             name="email"
             children={(f) => (
@@ -120,7 +122,7 @@ export function ContactForm({
             )}
           />
         </Field>
-        <Field label="Phone">
+        <Field mode="edit" label="Phone">
           <form.Field
             name="phone"
             children={(f) => (
@@ -136,7 +138,7 @@ export function ContactForm({
         </Field>
       </div>
 
-      <Field label="URL">
+      <Field mode="edit" label="URL">
         <form.Field
           name="url"
           children={(f) => (
@@ -150,7 +152,7 @@ export function ContactForm({
         />
       </Field>
 
-      <Field label="Notes">
+      <Field mode="edit" label="Notes">
         <form.Field
           name="notes"
           children={(f) => (
@@ -192,28 +194,4 @@ export function ContactForm({
       </div>
     </form>
   );
-}
-
-/* — helpers — */
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="grid items-center gap-2 grid-cols-[8rem_minmax(0,1fr)]">
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
-      <div>{children}</div>
-    </div>
-  );
-}
-
-function Error({ msg }: { msg?: string }) {
-  if (!msg) return null;
-  return <p className="mt-1 text-xs text-red-600">{msg}</p>;
 }
