@@ -1,18 +1,17 @@
+// src/components/applications/ApplicationHero/ApplicationHeroForm.tsx
+
 /* eslint-disable react/no-children-prop */
 "use client";
 
 import * as React from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import type {
   ApplicationRead,
   ApplicationUpdate,
 } from "@/lib/api/applications";
 import {
-  getApplicationByIdOptions,
-  getApplicationsOptions,
-  updateApplicationMutation,
-  createApplicationMutation,
+  useCreateApplication,
+  useUpdateApplication,
 } from "@/lib/api/applications";
 import {
   PIPELINE_STATUS_LABELS,
@@ -60,8 +59,6 @@ export default function ApplicationHeroForm({
   onCancel: () => void;
   onSaved: (createdOrUpdated?: ApplicationRead) => void;
 }) {
-  const qc = useQueryClient();
-
   // ---- initial values
   const initial = React.useMemo(() => {
     if (mode === "edit") {
@@ -74,39 +71,9 @@ export default function ApplicationHeroForm({
     return toInitialValues({ date_applied: today } as ApplicationRead);
   }, [mode, app]);
 
-  // ---- mutations
-  const updateMut = useMutation({
-    ...updateApplicationMutation(),
-    mutationKey: ["applications", "patch", app?.id] as const,
-    onSuccess: async (updated) => {
-      if (!app) return;
-      // 1) write-through the by-id query
-      const byIdKey = getApplicationByIdOptions({
-        path: { application_id: app.id },
-      }).queryKey;
-      qc.setQueryData<ApplicationRead>(byIdKey, updated);
-      // 2) refresh list(s)
-      await qc.invalidateQueries({
-        queryKey: getApplicationsOptions().queryKey,
-        exact: false,
-      });
-      onSaved(updated);
-    },
-    onError: () => alert("Failed to save changes"),
-  });
-
-  const createMut = useMutation({
-    ...createApplicationMutation(),
-    onSuccess: async (created) => {
-      // refresh list(s); the server returns full ApplicationRead
-      await qc.invalidateQueries({
-        queryKey: getApplicationsOptions().queryKey,
-        exact: false,
-      });
-      onSaved(created);
-    },
-    onError: () => alert("Failed to create application"),
-  });
+  // ---- mutations (wrapped: include mutationKey + invalidation/write-through)
+  const updateMut = useUpdateApplication();
+  const createMut = useCreateApplication();
 
   // ---- form
   const form = useForm({
@@ -125,10 +92,16 @@ export default function ApplicationHeroForm({
           onCancel();
           return;
         }
-        updateMut.mutate({
-          path: { application_id: app.id },
-          body: submitDiff,
-        });
+        updateMut.mutate(
+          {
+            path: { application_id: app.id },
+            body: submitDiff,
+          },
+          {
+            onSuccess: (updated) => onSaved(updated as ApplicationRead),
+            onError: () => alert("Failed to save changes"),
+          },
+        );
       } else {
         const body = {
           company: value.company.trim(),
@@ -151,7 +124,13 @@ export default function ApplicationHeroForm({
           salary_target: toIntOrNull(value.salary_target),
           resolution_date: emptyToNull(value.resolution_date),
         };
-        createMut.mutate({ body });
+        createMut.mutate(
+          { body },
+          {
+            onSuccess: (created) => onSaved(created as ApplicationRead),
+            onError: () => alert("Failed to create application"),
+          },
+        );
       }
     },
   });
