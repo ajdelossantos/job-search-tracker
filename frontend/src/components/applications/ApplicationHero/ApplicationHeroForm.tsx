@@ -1,5 +1,3 @@
-// src/components/applications/ApplicationHero/ApplicationHeroForm.tsx
-
 /* eslint-disable react/no-children-prop */
 "use client";
 
@@ -13,6 +11,8 @@ import {
   useCreateApplication,
   useUpdateApplication,
 } from "@/lib/api/applications";
+import { Field } from "@/components/forms/Field";
+import { Error } from "@/components/forms/Error";
 import {
   PIPELINE_STATUS_LABELS,
   JOB_LOCATION_LABELS,
@@ -192,7 +192,7 @@ export default function ApplicationHeroForm({
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {/* Left column */}
         <div className="space-y-3">
-          <Field name="company" label="Company" required>
+          <Field mode="edit" name="company" label="Company" required>
             <form.Field
               name="company"
               validators={{ onBlur: combine(required, minLength(3)) }}
@@ -208,7 +208,7 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-          <Field name="role" label="Role" required>
+          <Field mode="edit" name="role" label="Role" required>
             <form.Field
               name="role"
               validators={{ onBlur: combine(required, minLength(3)) }}
@@ -224,7 +224,7 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-          <Field name="url" label="URL">
+          <Field mode="edit" name="url" label="URL">
             <form.Field
               name="url"
               validators={{ onBlur: urlValidator }}
@@ -240,7 +240,7 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-          <Field name="recruiting_agency" label="Recruiting Agency">
+          <Field mode="edit" name="recruiting_agency" label="Recruiting Agency">
             <form.Field
               name="recruiting_agency"
               children={(f) => (
@@ -252,7 +252,7 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-          <Field name="date_applied" label="Date Applied" required>
+          <Field mode="edit" name="date_applied" label="Date Applied" required>
             <form.Field
               name="date_applied"
               validators={{
@@ -272,7 +272,7 @@ export default function ApplicationHeroForm({
               )}
             />
           </Field>
-          <Field name="next_follow_up_at" label="Next Follow Up">
+          <Field mode="edit" name="next_follow_up_at" label="Next Follow Up">
             <form.Field
               name="next_follow_up_at"
               validators={{ onChange: optionalDateTime }}
@@ -291,7 +291,7 @@ export default function ApplicationHeroForm({
             />
           </Field>
           <DeviceTzHint />
-          <Field name="notes" label="Notes">
+          <Field mode="edit" name="notes" label="Notes">
             <form.Field
               name="notes"
               children={(f) => (
@@ -308,21 +308,21 @@ export default function ApplicationHeroForm({
 
         {/* Right column */}
         <div className="space-y-3">
-          <Field name="pipeline_status" label="Pipeline Status">
+          <Field mode="edit" name="pipeline_status" label="Pipeline Status">
             <EnumSelect
               form={form as ReturnType<typeof useForm>}
               name="pipeline_status"
               options={statusOptions}
             />
           </Field>
-          <Field name="job_location" label="Job Location" required>
+          <Field mode="edit" name="job_location" label="Job Location" required>
             <EnumSelect
               form={form as ReturnType<typeof useForm>}
               name="job_location"
               options={locationOptions}
             />
           </Field>
-          <Field name="resolution_status" label="Resolution Status">
+          <Field mode="edit" name="resolution_status" label="Resolution Status">
             <EnumSelect
               form={form as ReturnType<typeof useForm>}
               name="resolution_status"
@@ -332,7 +332,12 @@ export default function ApplicationHeroForm({
 
           {/* Salary group */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <Field name="salary_min" label="Salary Min" className="grid-cols-1">
+            <Field
+              mode="edit"
+              name="salary_min"
+              label="Salary Min"
+              className="grid-cols-1"
+            >
               <form.Field
                 name="salary_min"
                 validators={{ onChange: integer }}
@@ -351,7 +356,12 @@ export default function ApplicationHeroForm({
               />
             </Field>
 
-            <Field name="salary_max" label="Salary Max" className="grid-cols-1">
+            <Field
+              mode="edit"
+              name="salary_max"
+              label="Salary Max"
+              className="grid-cols-1"
+            >
               <form.Field
                 name="salary_max"
                 validators={{ onChange: integer }}
@@ -370,7 +380,12 @@ export default function ApplicationHeroForm({
               />
             </Field>
 
-            <Field name="salary_target" label="Target" className="grid-cols-1">
+            <Field
+              mode="edit"
+              name="salary_target"
+              label="Target"
+              className="grid-cols-1"
+            >
               <form.Field
                 name="salary_target"
                 validators={{ onChange: integer }}
@@ -390,7 +405,7 @@ export default function ApplicationHeroForm({
             </Field>
           </div>
 
-          <Field name="resolution_date" label="Resolution Date">
+          <Field mode="edit" name="resolution_date" label="Resolution Date">
             <form.Field
               name="resolution_date"
               validators={{ onChange: date }}
@@ -411,37 +426,6 @@ export default function ApplicationHeroForm({
       </div>
     </section>
   );
-}
-
-function Field(props: {
-  name: string;
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "grid items-center gap-3",
-        props.className ?? "grid-cols-[10rem_minmax(0,1fr)]",
-      )}
-    >
-      <label
-        className="text-xs uppercase tracking-wide text-gray-500"
-        htmlFor={props.name}
-      >
-        {props.label}
-        {props.required ? " *" : ""}
-      </label>
-      <div>{props.children}</div>
-    </div>
-  );
-}
-
-function Error({ msg }: { msg?: string }) {
-  if (!msg) return null;
-  return <p className="mt-1 text-xs text-red-600">{msg}</p>;
 }
 
 function EnumSelect<

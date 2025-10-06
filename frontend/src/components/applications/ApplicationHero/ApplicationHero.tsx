@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/forms/Field";
 import { ResolutionBadge } from "@/components/applications/ResolutionBadge";
 import { StatusBadge } from "@/components/applications/StatusBadge";
 import TableDateCell from "@/components/table/TableDateCell";
@@ -13,7 +14,6 @@ import { useConfirm } from "@/components/confirm/useConfirm";
 import ApplicationHeroForm from "@/components/applications/ApplicationHero/ApplicationHeroForm";
 import { displayUrl } from "@/lib/utils/text-helpers";
 import { PIPELINE_STATUS_LABELS, JOB_LOCATION_LABELS } from "@/lib/utils/enums";
-import { cn } from "@/lib/utils/tailwind-utils";
 import {
   useDeleteApplication,
   type ApplicationRead,
@@ -137,9 +137,10 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
       {/* Two-column detail */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Field label="Company" value={app.company} />
-          <Field label="Role" value={app.role} />
+          <Field mode="read" label="Company" value={app.company} />
+          <Field mode="read" label="Role" value={app.role} />
           <Field
+            mode="read"
             label="URL"
             value={
               app.url ? (
@@ -158,15 +159,18 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
             }
           />
           <Field
+            mode="read"
             label="Recruiting Agency"
             value={app.recruiting_agency ?? "—"}
           />
           <Field
+            mode="read"
             label="Date Applied"
             value={<TableDateCell iso={app.date_applied} showTime={false} />}
             title={app.date_applied}
           />
           <Field
+            mode="read"
             label="Next Follow Up"
             value={
               <TableDateCell
@@ -177,6 +181,7 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
           />
           <DeviceTzHint />
           <Field
+            mode="read"
             label="Notes"
             value={
               app.notes ? (
@@ -190,6 +195,7 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
 
         <div className="space-y-2">
           <Field
+            mode="read"
             label="Pipeline Status"
             value={
               app.pipeline_status
@@ -198,10 +204,12 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
             }
           />
           <Field
+            mode="read"
             label="Job Location"
             value={JOB_LOCATION_LABELS[app.job_location]}
           />
           <Field
+            mode="read"
             label="Resolution"
             value={
               app.resolution_status ? (
@@ -212,18 +220,21 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
             }
           />
           <Field
+            mode="read"
             label="Salary Min"
             value={
               app.salary_min != null ? currency.format(app.salary_min) : "—"
             }
           />
           <Field
+            mode="read"
             label="Salary Max"
             value={
               app.salary_max != null ? currency.format(app.salary_max) : "—"
             }
           />
           <Field
+            mode="read"
             label="Salary Target"
             value={
               app.salary_target != null
@@ -232,6 +243,7 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
             }
           />
           <Field
+            mode="read"
             label="Resolution Date"
             value={
               <TableDateCell
@@ -246,30 +258,5 @@ export default function ApplicationHero({ app }: { app: ApplicationRead }) {
       {/* confirm portal */}
       <ConfirmDialog />
     </section>
-  );
-}
-
-function Field({
-  label,
-  value,
-  title,
-  className,
-}: {
-  label: string;
-  value: React.ReactNode;
-  title?: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn("grid grid-cols-[10rem_1fr] items-start gap-3", className)}
-    >
-      <div className="text-xs uppercase tracking-wide text-gray-500">
-        {label}
-      </div>
-      <div title={title} className="text-gray-900">
-        {value}
-      </div>
-    </div>
   );
 }
