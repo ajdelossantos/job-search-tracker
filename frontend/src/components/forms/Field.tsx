@@ -22,7 +22,7 @@ export type FieldProps = {
  *
  * @param props - The field component properties
  * @param props.label - The label text to display for the field
- * @param props.mode - Display mode: 'form' for editable fields or 'read' for read-only display
+ * @param props.mode - Display mode: 'edit' for editable fields or 'read' for read-only display
  * @param props.name - The name attribute for form fields (used for htmlFor in labels)
  * @param props.required - Whether the field is required (shows asterisk in form mode)
  * @param props.value - The value to display in read mode
@@ -36,7 +36,7 @@ export type FieldProps = {
  * @returns A grid-based field component with label and content areas
  *
  * - mode="read": label + value (Application detail panes)
- * - mode="form": label + children (inputs). Sets `htmlFor` when `name` is provided.
+ * - mode="edit": label + children (inputs). Sets `htmlFor` when `name` is provided.
  *
  * Common props:
  *  - labelWidth: CSS width for the label column (default "10rem"; use "8rem" for compact layouts)
