@@ -3,6 +3,24 @@ export function isIsoDateTime(iso?: string | null): boolean {
   return typeof iso === "string" && iso.includes("T");
 }
 
+/**
+ * Parses an ISO date string and returns a Date object or null.
+ *
+ * For date-only strings in YYYY-MM-DD format, creates a local date to prevent
+ * timezone shifts. For full ISO strings with time/offset information, uses the
+ * built-in Date parser.
+ *
+ * @param iso - The ISO date string to parse, or null/undefined
+ * @returns A Date object if parsing succeeds, null if the input is falsy or invalid
+ *
+ * @example
+ * ```typescript
+ * parseIso("2023-12-25"); // Returns local date for Dec 25, 2023
+ * parseIso("2023-12-25T10:30:00Z"); // Returns UTC date with time
+ * parseIso(null); // Returns null
+ * parseIso("invalid"); // Returns null
+ * ```
+ */
 function parseIso(iso?: string | null): Date | null {
   if (!iso) return null;
 
@@ -177,3 +195,23 @@ export const toLocalDatetime = (iso?: string | null) => {
     `${pad(d.getMinutes())}`
   );
 };
+
+/**
+ * Converts a local date-time string to ISO 8601 format.
+ *
+ * @param v - The local date-time string to convert. Can be undefined or null.
+ * @returns The ISO 8601 formatted string, or null if the input is invalid or empty.
+ *
+ * @example
+ * ```typescript
+ * localDateTimeToISO('2023-12-25 10:30:00') // Returns '2023-12-25T10:30:00.000Z'
+ * localDateTimeToISO('') // Returns null
+ * localDateTimeToISO(null) // Returns null
+ * ```
+ */
+export function localDateTimeToISO(v?: string | null): string | null {
+  const s = (v ?? "").trim();
+  if (!s) return null;
+  if (!isLocalDateTime(s)) return null; // guarded by validator
+  return new Date(s).toISOString();
+}

@@ -31,7 +31,11 @@ import {
  * ```
  */
 export function EnumSelect<
-  N extends "pipeline_status" | "job_location" | "resolution_status",
+  N extends
+    | "pipeline_status"
+    | "job_location"
+    | "resolution_status"
+    | "interview_type",
 >({
   form,
   name,
@@ -43,7 +47,7 @@ export function EnumSelect<
 }) {
   return (
     <form.Field
-      name={name}
+      name={name === "interview_type" ? "type" : name}
       children={(f) => (
         <Select
           value={f.state.value ? String(f.state.value) : undefined}

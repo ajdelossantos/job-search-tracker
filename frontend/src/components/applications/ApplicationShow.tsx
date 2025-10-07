@@ -5,6 +5,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { getApplicationByIdOptions } from "@/lib/api/applications";
 import ApplicationHero from "@/components/applications/ApplicationHero";
 import ContactsShow from "@/components/contacts/ContactsShow";
+import InterviewsShow from "@/components/interviews/InterviewsShow";
 
 type TabKey = "contacts" | "interviews" | "history";
 
@@ -51,9 +52,7 @@ export default function ApplicationShow({ id }: { id: number }) {
 
       <div role="tabpanel">
         {tab === "contacts" && <ContactsShow appId={app.id} />}
-        {tab === "interviews" && (
-          <div className="text-sm text-gray-500">Interviews (coming soon)</div>
-        )}
+        {tab === "interviews" && <InterviewsShow appId={app.id} />}
         {tab === "history" && (
           <div className="text-sm text-gray-500">History (coming soon)</div>
         )}
