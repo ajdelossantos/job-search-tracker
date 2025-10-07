@@ -47,7 +47,7 @@ export function EnumSelect<
 }) {
   return (
     <form.Field
-      name={name}
+      name={name === "interview_type" ? "type" : name}
       children={(f) => (
         <Select
           value={f.state.value ? String(f.state.value) : undefined}

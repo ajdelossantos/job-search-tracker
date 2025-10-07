@@ -118,7 +118,7 @@ export default function InterviewForm({
       <Field mode="edit" label="Interview Type" name="type" required>
         <EnumSelect
           form={form as ReturnType<typeof useForm>}
-          name="interview_type"
+          name="type"
           options={interviewTypeOptions}
         />
       </Field>
