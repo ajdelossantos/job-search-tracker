@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   // Nested (scoped to application) — use for GET/POST
   listInterviewsForApplicationApiV1ApplicationsApplicationIdInterviewsGetOptions as listAppInterviewsOptions,
@@ -8,41 +8,41 @@ import {
   readInterviewApiV1InterviewsInterviewIdGetOptions as readInterviewOptions,
   updateInterviewApiV1InterviewsInterviewIdPatchMutation as _updateInterviewMutation,
   deleteInterviewApiV1InterviewsInterviewIdDeleteMutation as _deleteInterviewMutation,
-} from '@/client/@tanstack/react-query.gen'
-import type { InterviewRead } from '@/client'
+} from "@/client/@tanstack/react-query.gen";
+import type { InterviewRead } from "@/client";
 
 export type {
   InterviewRead,
   InterviewCreate,
   InterviewUpdate,
   InterviewType,
-} from '@/client'
+} from "@/client";
 
 /** Query helper: interviews linked to a specific application (nested endpoint) */
 export const getInterviewsByApplicationId = (
   application_id: number,
   limit = 200,
-  offset = 0
+  offset = 0,
 ) =>
   listAppInterviewsOptions({
     path: { application_id },
     query: { limit, offset },
-  })
+  });
 
 /** By-id queryKey helper (for write-through and cleanup) */
 export const interviewByIdKey = (interview_id: number) =>
-  readInterviewOptions({ path: { interview_id } }).queryKey
+  readInterviewOptions({ path: { interview_id } }).queryKey;
 
 /** Internal: list key for an app */
 const interviewsListKey = (application_id: number) =>
-  getInterviewsByApplicationId(application_id).queryKey
+  getInterviewsByApplicationId(application_id).queryKey;
 
 /** Stable mutation keys for Devtools labeling */
 const interviewsMutationKeys = {
-  create: (appId: number) => ['interviews', 'create', appId] as const,
-  update: (id?: number) => ['interviews', 'update', id] as const,
-  delete: (id?: number) => ['interviews', 'delete', id] as const,
-}
+  create: (appId: number) => ["interviews", "create", appId] as const,
+  update: (id?: number) => ["interviews", "update", id] as const,
+  delete: (id?: number) => ["interviews", "delete", id] as const,
+};
 
 /**
  * Create Interview (nested).
@@ -60,19 +60,19 @@ const interviewsMutationKeys = {
  * });
  */
 export function useCreateInterview(application_id: number) {
-  const qc = useQueryClient()
-  const base = _createInterviewNestedMutation()
+  const qc = useQueryClient();
+  const base = _createInterviewNestedMutation();
   return useMutation({
     mutationFn: base.mutationFn,
     mutationKey: interviewsMutationKeys.create(application_id),
     onSuccess: async (data: InterviewRead) => {
-      if (data?.id) qc.setQueryData(interviewByIdKey(data.id), data)
+      if (data?.id) qc.setQueryData(interviewByIdKey(data.id), data);
       await qc.invalidateQueries({
         queryKey: interviewsListKey(application_id),
         exact: false,
-      })
+      });
     },
-  })
+  });
 }
 
 /**
@@ -91,19 +91,19 @@ export function useCreateInterview(application_id: number) {
  * });
  */
 export function useUpdateInterview(application_id: number) {
-  const qc = useQueryClient()
-  const base = _updateInterviewMutation()
+  const qc = useQueryClient();
+  const base = _updateInterviewMutation();
   return useMutation({
     mutationFn: base.mutationFn,
     mutationKey: interviewsMutationKeys.update(),
     onSuccess: async (data: InterviewRead) => {
-      if (data?.id) qc.setQueryData(interviewByIdKey(data.id), data)
+      if (data?.id) qc.setQueryData(interviewByIdKey(data.id), data);
       await qc.invalidateQueries({
         queryKey: interviewsListKey(application_id),
         exact: false,
-      })
+      });
     },
-  })
+  });
 }
 
 /**
@@ -118,20 +118,21 @@ export function useUpdateInterview(application_id: number) {
  * del.mutate({ path: { interview_id: 42 } });
  */
 export function useDeleteInterview(application_id: number) {
-  const qc = useQueryClient()
-  const base = _deleteInterviewMutation()
+  const qc = useQueryClient();
+  const base = _deleteInterviewMutation();
   return useMutation({
     mutationFn: base.mutationFn,
     mutationKey: interviewsMutationKeys.delete(),
     onSuccess: async (_data, variables) => {
-      const id = (variables as { path: { interview_id: number } }).path.interview_id
+      const id = (variables as { path: { interview_id: number } }).path
+        .interview_id;
       if (id != null) {
-        await qc.removeQueries({ queryKey: interviewByIdKey(id) })
+        await qc.removeQueries({ queryKey: interviewByIdKey(id) });
       }
       await qc.invalidateQueries({
         queryKey: interviewsListKey(application_id),
         exact: false,
-      })
+      });
     },
-  })
+  });
 }
