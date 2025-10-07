@@ -31,7 +31,7 @@ import {
  * ```
  */
 export function EnumSelect<
-  N extends "pipeline_status" | "job_location" | "resolution_status",
+  N extends "pipeline_status" | "job_location" | "resolution_status" | "interview_type",
 >({
   form,
   name,
