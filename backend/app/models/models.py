@@ -41,6 +41,7 @@ from sqlalchemy import (
     Text,
     Enum as SqlEnum,
     CheckConstraint,
+    Index,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -167,6 +168,7 @@ class PipelineHistory(Base):
 
     Each record captures:
       - When it changed (`changed_at`)
+      - Actual date of change, if different from timestamp for user backdating (`transition_date`)
       - From which status (nullable to handle initial state)
       - To which status
       - Optional human note
@@ -184,6 +186,16 @@ class PipelineHistory(Base):
     changed_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    transition_date = Column(Date, nullable=False, default=func.current_date())
     from_status = Column(SqlEnum(PipelineStatus), nullable=True)
     to_status = Column(SqlEnum(PipelineStatus), nullable=False)
     note = Column(Text)
+
+    __table_args__ = (
+        Index("ix_pipeline_history_appid_changed_at", "application_id", "changed_at"),
+        Index(
+            "ix_pipeline_history_appid_transition_date",
+            "application_id",
+            "transition_date",
+        ),
+    )

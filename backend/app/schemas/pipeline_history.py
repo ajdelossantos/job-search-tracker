@@ -1,8 +1,8 @@
 """Pydantic schemas for PiplineHistory."""
 
-from datetime import datetime
+from datetime import date, datetime, timezone
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 from app.core.enums import PipelineStatus
 from app.core.timeutils import to_z
 
@@ -17,6 +17,10 @@ class PipelineHistoryBase(BaseModel):
     to_status: PipelineStatus = Field(
         ...,
         description="Target status the application moved into.",
+    )
+    transition_date: Optional[date] = Field(
+        ...,
+        description="Date the status transition occurred. Time portion is ignored.",
     )
     note: Optional[str] = Field(
         default=None,
@@ -35,12 +39,20 @@ class PipelineHistoryCreate(PipelineHistoryBase):
         json_schema_extra={
             "example": {
                 "application_id": 42,
+                "transition_date": "2025-09-01",
                 "from_status": PipelineStatus.WILL_APPLY.value,
                 "to_status": PipelineStatus.APPLIED.value,
                 "note": "Applied via company website",
             }
         }
     )
+
+    @field_validator("transition_date")
+    @classmethod
+    def _no_future(cls, v: date | None) -> date | None:
+        if v and v > datetime.now(timezone.utc).date():
+            raise ValueError("transition_date cannot be in the future")
+        return v
 
 
 class PipelineHistoryCreateFlat(PipelineHistoryBase):
@@ -49,6 +61,7 @@ class PipelineHistoryCreateFlat(PipelineHistoryBase):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
+                "transition_date": "2025-09-01",
                 "from_status": PipelineStatus.WILL_APPLY.value,
                 "to_status": PipelineStatus.APPLIED.value,
                 "note": "Applied via company website",
@@ -65,16 +78,22 @@ class PipelineHistoryUpdate(BaseModel):
     """
     Schema for updating a pipeline history record.
 
-    Only `note` may be updated. Attempts to change status fields are ignored by the router.
+    Only `note` and `transition_date` may be updated. Attempts to change status fields are ignored by the router.
     """
 
     model_config = ConfigDict(
         extra="forbid",
         json_schema_extra={
             "example": {
+                "transition_date": "2025-08-31",
                 "note": "Updating audit trail notes.",
             }
         },
+    )
+
+    transition_date: Optional[date] = Field(
+        default=None,
+        description="Date the status transition occurred. Time portion is ignored.",
     )
 
     note: Optional[str] = Field(
@@ -93,6 +112,7 @@ class PipelineHistoryRead(PipelineHistoryBase):
             "example": {
                 "id": 101,
                 "application_id": 42,
+                "transition_date": "2025-09-01",
                 "from_status": PipelineStatus.APPLIED.value,
                 "to_status": PipelineStatus.STAGE_1.value,
                 "note": "Recruiter screen scheduled",
