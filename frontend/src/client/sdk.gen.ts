@@ -529,7 +529,7 @@ export const updateInterviewApiV1InterviewsInterviewIdPatch = <
 
 /**
  * List pipeline history for an application
- * Returns the pipeline history entries for an application, ordered by `changed_at` descending (most recent first).
+ * Returns the pipeline history entries for an application, ordered by `transition_date` descending (most recent first).
  */
 export const listPipelineHistoryForApplicationApiV1ApplicationsApplicationIdPipelineHistoryGet =
   <ThrowOnError extends boolean = false>(
@@ -667,7 +667,7 @@ export const readPipelineHistoryApiV1PipelineHistoryHistoryIdGet = <
 
 /**
  * Update a pipeline history note
- * Only the `note` field may be updated. Status fields are ignored.
+ * Only the `note` and `transition_date` fields may be updated. Status fields are ignored.
  */
 export const updatePipelineHistoryApiV1PipelineHistoryHistoryIdPatch = <
   ThrowOnError extends boolean = false,

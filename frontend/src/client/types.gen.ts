@@ -470,7 +470,7 @@ export type PipelineHistoryCreate = {
    * Transition Date
    * Date the status transition occurred. Time portion is ignored.
    */
-  transition_date: string | null;
+  transition_date?: string | null;
   /**
    * Note
    * Optional human note describing the change.
@@ -495,7 +495,7 @@ export type PipelineHistoryCreateFlat = {
    * Transition Date
    * Date the status transition occurred. Time portion is ignored.
    */
-  transition_date: string | null;
+  transition_date?: string | null;
   /**
    * Note
    * Optional human note describing the change.
@@ -525,7 +525,7 @@ export type PipelineHistoryRead = {
    * Transition Date
    * Date the status transition occurred. Time portion is ignored.
    */
-  transition_date: string | null;
+  transition_date?: string | null;
   /**
    * Note
    * Optional human note describing the change.
@@ -549,7 +549,8 @@ export type PipelineHistoryRead = {
  * PipelineHistoryUpdate
  * Schema for updating a pipeline history record.
  *
- * Only `note` and `transition_date` may be updated. Attempts to change status fields are ignored by the router.
+ * Only `note` and `transition_date` may be updated. Attempts to change status fields are ignored by the
+ * router.
  */
 export type PipelineHistoryUpdate = {
   /**
