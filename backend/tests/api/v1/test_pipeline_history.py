@@ -6,12 +6,17 @@ from app.core.enums import PipelineStatus
 
 
 def _new_history_payload(
-    to_status=PipelineStatus.APPLIED.value, from_status=None, note="moved"
+    transition_date=None,
+    to_status=PipelineStatus.APPLIED.value,
+    from_status=None,
+    note="moved",
 ):
     """Helper: build a minimal payload for creation endpoints."""
     payload = {"to_status": to_status, "note": note}
     if from_status is not None:
         payload["from_status"] = from_status
+    if transition_date is not None:
+        payload["transition_date"] = transition_date
     return payload
 
 
@@ -36,6 +41,7 @@ def test_create_pipeline_history_nested_returns_read(client, make_application):
     assert body["from_status"] == PipelineStatus.WILL_APPLY.value
     assert body["note"] == "Applied via site"
     assert "changed_at" in body
+    assert "transition_date" in body
 
 
 def test_create_pipeline_history_nested_missing_app_returns_404(client):

@@ -19,7 +19,7 @@ class PipelineHistoryBase(BaseModel):
         description="Target status the application moved into.",
     )
     transition_date: Optional[date] = Field(
-        ...,
+        default=None,
         description="Date the status transition occurred. Time portion is ignored.",
     )
     note: Optional[str] = Field(
@@ -73,12 +73,20 @@ class PipelineHistoryCreateFlat(PipelineHistoryBase):
         ..., description="Application id to attach this history to."
     )
 
+    @field_validator("transition_date")
+    @classmethod
+    def _no_future(cls, v: date | None) -> date | None:
+        if v and v > datetime.now(timezone.utc).date():
+            raise ValueError("transition_date cannot be in the future")
+        return v
+
 
 class PipelineHistoryUpdate(BaseModel):
     """
     Schema for updating a pipeline history record.
 
-    Only `note` and `transition_date` may be updated. Attempts to change status fields are ignored by the router.
+    Only `note` and `transition_date` may be updated. Attempts to change status fields are ignored by the
+    router.
     """
 
     model_config = ConfigDict(

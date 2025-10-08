@@ -39,7 +39,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
     summary="List pipeline history for an application",
     description=(
         "Returns the pipeline history entries for an application, ordered by "
-        "`changed_at` descending (most recent first)."
+        "`transition_date` descending (most recent first)."
     ),
 )
 async def list_pipeline_history_for_application(
@@ -56,7 +56,11 @@ async def list_pipeline_history_for_application(
     query = (
         db.query(PipelineHistory)
         .filter(PipelineHistory.application_id == application_id)
-        .order_by(PipelineHistory.changed_at.desc(), PipelineHistory.id.desc())
+        .order_by(
+            PipelineHistory.transition_date.desc(),
+            PipelineHistory.changed_at.desc(),
+            PipelineHistory.id.desc(),
+        )
         .limit(limit)
         .offset(offset)
     )
@@ -134,6 +138,7 @@ async def read_pipeline_histories(
 
     pipeline_histories = (
         query.order_by(
+            PipelineHistory.transition_date.desc(),
             PipelineHistory.changed_at.desc(),
             PipelineHistory.id.desc(),
         )
@@ -191,6 +196,7 @@ async def create_pipeline_history(
         application_id=payload.application_id,
         from_status=payload.from_status,
         to_status=payload.to_status,
+        transition_date=payload.transition_date,
         note=payload.note,
     )
     db.add(new_history)
@@ -205,7 +211,7 @@ async def create_pipeline_history(
     response_model=PipelineHistoryRead,
     status_code=status.HTTP_200_OK,
     summary="Update a pipeline history note",
-    description="Only the `note` field may be updated. Status fields are ignored.",
+    description="Only the `note` and `transition_date` fields may be updated. Status fields are ignored.",
 )
 async def update_pipeline_history(
     db: db_dependency,
@@ -218,7 +224,7 @@ async def update_pipeline_history(
     if pipeline_history is None:
         raise HTTPException(status_code=404, detail="Pipeline history not found")
 
-    # Only note can be updated
+    # Only note and transition_date can be updated
     data = payload.model_dump(exclude_unset=True)
     # Explicitly ignore attempts to change statuses/application link
     data.pop("from_status", None)
