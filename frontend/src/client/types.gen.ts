@@ -467,6 +467,11 @@ export type PipelineHistoryCreate = {
    */
   to_status: PipelineStatus;
   /**
+   * Transition Date
+   * Date the status transition occurred. Time portion is ignored.
+   */
+  transition_date?: string | null;
+  /**
    * Note
    * Optional human note describing the change.
    */
@@ -486,6 +491,11 @@ export type PipelineHistoryCreateFlat = {
    * Target status the application moved into.
    */
   to_status: PipelineStatus;
+  /**
+   * Transition Date
+   * Date the status transition occurred. Time portion is ignored.
+   */
+  transition_date?: string | null;
   /**
    * Note
    * Optional human note describing the change.
@@ -512,6 +522,11 @@ export type PipelineHistoryRead = {
    */
   to_status: PipelineStatus;
   /**
+   * Transition Date
+   * Date the status transition occurred. Time portion is ignored.
+   */
+  transition_date?: string | null;
+  /**
    * Note
    * Optional human note describing the change.
    */
@@ -534,9 +549,15 @@ export type PipelineHistoryRead = {
  * PipelineHistoryUpdate
  * Schema for updating a pipeline history record.
  *
- * Only `note` may be updated. Attempts to change status fields are ignored by the router.
+ * Only `note` and `transition_date` may be updated. Attempts to change status fields are ignored by the
+ * router.
  */
 export type PipelineHistoryUpdate = {
+  /**
+   * Transition Date
+   * Date the status transition occurred. Time portion is ignored.
+   */
+  transition_date?: string | null;
   /**
    * Note
    * New note. If omitted, note remains unchanged.
