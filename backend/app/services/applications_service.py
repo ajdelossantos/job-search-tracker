@@ -52,7 +52,7 @@ def create_application_with_history(
     db.add(
         PipelineHistory(
             application_id=application.id,
-            transition_date=datetime.now(timezone.utc),
+            transition_date=datetime.now(timezone.utc).date(),
             from_status=None,
             to_status=application.pipeline_status,
             note=None,
@@ -90,7 +90,7 @@ def update_application_with_history(
         db.add(
             PipelineHistory(
                 application_id=application_id,
-                transition_date=datetime.now(timezone.utc),
+                transition_date=datetime.now(timezone.utc).date(),
                 from_status=before_status,
                 to_status=application.pipeline_status,
                 note=None,

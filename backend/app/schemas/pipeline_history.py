@@ -85,8 +85,8 @@ class PipelineHistoryUpdate(BaseModel):
     """
     Schema for updating a pipeline history record.
 
-    Only `note` and `transition_date` may be updated. Attempts to change status fields are ignored by the
-    router.
+    Only `note` and `transition_date` may be updated. Attempts to change status fields
+    are ignored by the router.
     """
 
     model_config = ConfigDict(
