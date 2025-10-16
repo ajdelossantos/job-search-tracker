@@ -11,11 +11,7 @@ import { Error } from "@/components/forms/Error";
 import { Field } from "@/components/forms/Field";
 import { PIPELINE_STATUS_LABELS } from "@/lib/utils/enums";
 import { formatDateShort, dateOnly } from "@/lib/utils/datetime";
-import {
-  combine,
-  date as dateValidator,
-  required,
-} from "@/lib/forms/validators";
+import { date as dateValidator } from "@/lib/forms/validators";
 import { useUpdateHistory } from "@/lib/api/pipelineHistories";
 import type {
   PipelineHistoryRead,
@@ -95,6 +91,8 @@ function EditRow({
 }) {
   const update = useUpdateHistory(appId);
 
+  console.log("Original: ", original);
+
   type Values = {
     transition_date: string; // YYYY-MM-DD
     note: string; // blank allowed ("" → null)
@@ -132,6 +130,8 @@ function EditRow({
     },
   });
 
+  console.log("Form values: ", form.state);
+
   const fromLabel = original.from_status
     ? PIPELINE_STATUS_LABELS[original.from_status]
     : "—";
@@ -160,17 +160,19 @@ function EditRow({
       </div>
 
       {/* Editable fields (date-only + notes) */}
-      <div className="grid gap-2 sm:grid-cols-[16rem_1fr]">
-        <Field label="Transition Date" name="transition_date" required>
+      <div className="flex items-left gap-4 flex-col">
+        <Field mode="edit" label="Transition Date" name="transition_date">
           <form.Field
+            key={`ph-${original.id}-transition_date`}
             name="transition_date"
-            validators={{ onBlur: combine(required, dateValidator) }}
+            validators={{ onBlur: dateValidator }}
             children={(f) => (
               <>
                 <Input
-                  id="transition_date"
+                  id={`ph-${original.id}-transition_date`}
                   type="date"
                   value={f.state.value}
+                  className="w-40"
                   onChange={(e) => f.handleChange(e.target.value)}
                   onBlur={f.handleBlur}
                 />
@@ -180,13 +182,15 @@ function EditRow({
           />
         </Field>
 
-        <Field label="Notes" name="note">
+        <Field mode="edit" label="Notes" name="note">
           <form.Field
+            key={`ph-${original.id}-note`}
             name="note"
             children={(f) => (
               <Textarea
-                id="note"
-                rows={3}
+                id={`ph-${original.id}-note`}
+                className="w-full"
+                rows={5}
                 value={f.state.value}
                 onChange={(e) => f.handleChange(e.target.value)}
                 onBlur={f.handleBlur}
