@@ -91,8 +91,6 @@ function EditRow({
 }) {
   const update = useUpdateHistory(appId);
 
-  console.log("Original: ", original);
-
   type Values = {
     transition_date: string; // YYYY-MM-DD
     note: string; // blank allowed ("" → null)
@@ -129,8 +127,6 @@ function EditRow({
       });
     },
   });
-
-  console.log("Form values: ", form.state);
 
   const fromLabel = original.from_status
     ? PIPELINE_STATUS_LABELS[original.from_status]
