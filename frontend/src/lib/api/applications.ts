@@ -9,6 +9,7 @@ import {
 } from "@/client/@tanstack/react-query.gen";
 
 import type { ApplicationRead } from "@/client";
+import { getHistoryByApplicationId } from "./pipelineHistories";
 
 export {
   // Queries
@@ -111,6 +112,10 @@ export function useUpdateApplication() {
       }
       await qc.invalidateQueries({
         queryKey: getApplicationsOptions().queryKey,
+        exact: false,
+      });
+      await qc.invalidateQueries({
+        queryKey: getHistoryByApplicationId(data.id).queryKey,
         exact: false,
       });
     },
