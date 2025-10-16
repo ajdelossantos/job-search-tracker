@@ -47,6 +47,8 @@ export default function ContactsShow({ appId }: ContactShowProps) {
   const destroy = useDeleteContact(appId);
 
   const [open, setOpen] = React.useState(false);
+  const [editingId, setEditingId] = React.useState<number | null>(null);
+
   const anyPending =
     create.isPending ||
     update.isPending ||
@@ -115,30 +117,33 @@ export default function ContactsShow({ appId }: ContactShowProps) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {(contacts ?? []).map((c: ContactRead) => (
-          <ContactCard
-            key={c.id}
-            contact={c}
-            disabled={anyPending}
-            onEdit={(patch) =>
-              update.mutate({
-                path: { contact_id: c.id },
-                body: patch,
-              })
-            }
-            onUnlink={() =>
-              unlink.mutate({
-                path: { contact_id: c.id },
-                body: { application_ids_remove: [appId] },
-              })
-            }
-            onDelete={() =>
-              destroy.mutate({
-                path: { contact_id: c.id },
-              })
-            }
-          />
-        ))}
+        {(contacts ?? []).map((c: ContactRead) => {
+          const isEditing = editingId === c.id;
+          return (
+            <div key={c.id} className={isEditing ? "col-span-full" : undefined}>
+              <ContactCard
+                contact={c}
+                disabled={anyPending}
+                isEditing={isEditing}
+                onEditStart={() => setEditingId(c.id)}
+                onCancelEdit={() => setEditingId(null)}
+                onEdit={(patch) =>
+                  update.mutate(
+                    { path: { contact_id: c.id }, body: patch },
+                    { onSuccess: () => setEditingId(null) },
+                  )
+                }
+                onUnlink={() =>
+                  unlink.mutate({
+                    path: { contact_id: c.id },
+                    body: { application_ids_remove: [appId] },
+                  })
+                }
+                onDelete={() => destroy.mutate({ path: { contact_id: c.id } })}
+              />
+            </div>
+          );
+        })}
       </div>
     </section>
   );
