@@ -1,5 +1,3 @@
-// src/lib/api/contacts.ts
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   readContactsApiV1ContactsGetOptions,
@@ -11,6 +9,7 @@ import {
 import type { ContactRead } from "@/client";
 
 export type { ContactRead, ContactCreate, ContactUpdate } from "@/client";
+export { readContactsApiV1ContactsGetOptions as getContactsFlat } from "@/client/@tanstack/react-query.gen";
 
 /** Query helper: contacts linked to a specific application */
 export const getContactsByApplicationId = (appId: number) =>
