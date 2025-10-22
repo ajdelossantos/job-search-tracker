@@ -10,9 +10,8 @@ import {
   ConfirmDeleteButton,
 } from "@/components/contacts/ConfirmActions";
 import type { ContactFormValues } from "@/lib/api/contacts";
-import { displayUrl } from "@/lib/utils/text-helpers";
+import { displayUrl, emptyToNull } from "@/lib/utils/text-helpers";
 import { formatPhonePretty } from "@/lib/utils/phone-numbers";
-import { emptyToNull } from "@/lib/utils/text-helpers";
 
 function buildDiff(original: ContactRead, values: ContactFormValues) {
   const next = {
@@ -35,20 +34,42 @@ function buildDiff(original: ContactRead, values: ContactFormValues) {
   return diff;
 }
 
+type Props = {
+  contact: ContactRead;
+  disabled?: boolean;
+  onEdit: (patch: Record<string, unknown>) => void;
+  onUnlink: () => void;
+  onDelete: () => void;
+
+  /** Optional controlled edit mode props (useful to make the card span full width from the parent) */
+  isEditing?: boolean;
+  onEditStart?: () => void;
+  onCancelEdit?: () => void;
+};
+
 export default function ContactCard({
   contact,
   disabled,
   onEdit,
   onUnlink,
   onDelete,
-}: {
-  contact: ContactRead;
-  disabled?: boolean;
-  onEdit: (patch: Record<string, unknown>) => void;
-  onUnlink: () => void;
-  onDelete: () => void;
-}) {
-  const [editing, setEditing] = React.useState(false);
+  isEditing,
+  onEditStart,
+  onCancelEdit,
+}: Props) {
+  // If `isEditing` is provided, we are controlled; otherwise manage local state.
+  const controlled = typeof isEditing === "boolean";
+  const [localEditing, setLocalEditing] = React.useState(false);
+  const editing = controlled ? (isEditing as boolean) : localEditing;
+
+  const startEdit = () => {
+    if (onEditStart) onEditStart();
+    else setLocalEditing(true);
+  };
+  const cancelEdit = () => {
+    if (onCancelEdit) onCancelEdit();
+    else setLocalEditing(false);
+  };
 
   if (editing) {
     const initial: ContactFormValues = {
@@ -72,15 +93,16 @@ export default function ContactCard({
             initial={initial}
             disabled={disabled}
             submitLabel="Save"
-            onCancel={() => setEditing(false)}
+            onCancel={cancelEdit}
             onSubmit={(values) => {
               const diff = buildDiff(contact, values);
               if (Object.keys(diff).length === 0) {
-                setEditing(false);
+                cancelEdit();
                 return;
               }
               onEdit(diff);
-              setEditing(false);
+              // If uncontrolled, close immediately; if controlled, the parent will close on success.
+              if (!controlled) cancelEdit();
             }}
           />
         </CardContent>
@@ -97,7 +119,7 @@ export default function ContactCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setEditing(true)}
+              onClick={startEdit}
               disabled={disabled}
             >
               Edit
