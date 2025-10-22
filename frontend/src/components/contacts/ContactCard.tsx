@@ -23,11 +23,11 @@ function buildDiff(original: ContactRead, values: ContactFormValues) {
     phone: emptyToNull(values.phone),
     url: emptyToNull(values.url),
     notes: emptyToNull(values.notes),
-  } as const;
+  };
 
   const diff: Record<string, unknown> = {};
   (Object.keys(next) as (keyof typeof next)[]).forEach((k) => {
-    const was = (original as any)[k] ?? null;
+    const was = original[k as keyof ContactRead] ?? null;
     const now = next[k] ?? null;
     if (was !== now) diff[k] = now;
   });
