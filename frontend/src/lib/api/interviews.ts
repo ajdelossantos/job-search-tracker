@@ -18,6 +18,8 @@ export type {
   InterviewType,
 } from "@/client";
 
+export { listInterviewsApiV1InterviewsGetOptions as getInterviewsFlat } from "@/client/@tanstack/react-query.gen";
+
 /** Query helper: interviews linked to a specific application (nested endpoint) */
 export const getInterviewsByApplicationId = (
   application_id: number,

@@ -12,6 +12,7 @@ import {
 import type { ContactFormValues } from "@/lib/api/contacts";
 import { displayUrl, emptyToNull } from "@/lib/utils/text-helpers";
 import { formatPhonePretty } from "@/lib/utils/phone-numbers";
+import Link from "next/link";
 
 function buildDiff(original: ContactRead, values: ContactFormValues) {
   const next = {
@@ -23,7 +24,7 @@ function buildDiff(original: ContactRead, values: ContactFormValues) {
     phone: emptyToNull(values.phone),
     url: emptyToNull(values.url),
     notes: emptyToNull(values.notes),
-  };
+  } as const;
 
   const diff: Record<string, unknown> = {};
   (Object.keys(next) as (keyof typeof next)[]).forEach((k) => {
@@ -37,14 +38,14 @@ function buildDiff(original: ContactRead, values: ContactFormValues) {
 type Props = {
   contact: ContactRead;
   disabled?: boolean;
-  onEdit: (patch: Record<string, unknown>) => void;
-  onUnlink: () => void;
-  onDelete: () => void;
-
-  /** Optional controlled edit mode props (useful to make the card span full width from the parent) */
+  hideUnlink?: boolean;
+  appIds?: number[];
   isEditing?: boolean;
-  onEditStart?: () => void;
   onCancelEdit?: () => void;
+  onDelete: () => void;
+  onEdit: (patch: Record<string, unknown>) => void;
+  onEditStart?: () => void;
+  onUnlink: () => void;
 };
 
 export default function ContactCard({
@@ -53,23 +54,19 @@ export default function ContactCard({
   onEdit,
   onUnlink,
   onDelete,
+  hideUnlink,
+  appIds,
   isEditing,
   onEditStart,
   onCancelEdit,
 }: Props) {
-  // If `isEditing` is provided, we are controlled; otherwise manage local state.
   const controlled = typeof isEditing === "boolean";
   const [localEditing, setLocalEditing] = React.useState(false);
   const editing = controlled ? (isEditing as boolean) : localEditing;
 
-  const startEdit = () => {
-    if (onEditStart) onEditStart();
-    else setLocalEditing(true);
-  };
-  const cancelEdit = () => {
-    if (onCancelEdit) onCancelEdit();
-    else setLocalEditing(false);
-  };
+  const startEdit = () => (onEditStart ? onEditStart() : setLocalEditing(true));
+  const cancelEdit = () =>
+    onCancelEdit ? onCancelEdit() : setLocalEditing(false);
 
   if (editing) {
     const initial: ContactFormValues = {
@@ -101,7 +98,6 @@ export default function ContactCard({
                 return;
               }
               onEdit(diff);
-              // If uncontrolled, close immediately; if controlled, the parent will close on success.
               if (!controlled) cancelEdit();
             }}
           />
@@ -125,11 +121,13 @@ export default function ContactCard({
               Edit
             </Button>
 
-            <ConfirmUnlinkButton
-              disabled={disabled}
-              onConfirm={onUnlink}
-              title={`Unlink ${contact.name}?`}
-            />
+            {!hideUnlink && (
+              <ConfirmUnlinkButton
+                disabled={disabled}
+                onConfirm={onUnlink}
+                title={`Unlink ${contact.name}?`}
+              />
+            )}
 
             <ConfirmDeleteButton
               disabled={disabled}
@@ -138,10 +136,25 @@ export default function ContactCard({
             />
           </div>
         </div>
+
         <p className="text-sm text-muted-foreground">
           {contact.title ? `${contact.title} • ` : ""}
           {contact.company}
         </p>
+
+        {appIds && appIds.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {appIds.map((id) => (
+              <Link
+                key={id}
+                href={`/applications/${id}`}
+                className="inline-flex items-center rounded border px-2 py-0.5 text-xs text-blue-700 hover:underline bg-blue-50 border-blue-200"
+              >
+                App {id}
+              </Link>
+            ))}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent>
